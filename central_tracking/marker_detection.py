@@ -91,14 +91,14 @@ while not got_corners:
 
 	#detect positions of markers
 	marker_positions_and_labels = aruco.detectMarkers(frame, dictionary)[0:2]
-	marker_positions = [pos[0] for pos in marker_positions_and_labels[0]]
-	marker_labels = [lab[0] for lab in marker_positions[1]]
+	marker_positions = [marker_positions_and_labels[0][i][0] for i in range(len(marker_positions_and_labels[0]))]
+	marker_labels = [lab[0] for lab in marker_positions_and_labels[1]]
 
-	markers = aruco.drawDetectedMarkers(frame, marker_positions_and_labels[0])
+	markers = aruco.drawDetectedMarkers(frame.copy(), marker_positions_and_labels[0])
 
 	#show frame for testing camera position
 	#loop is broken out of when all border markers are detectable
-	cv2.imshow("markers", frame)
+	cv2.imshow("markers", markers)
 	try:
 		if set([0, 1, 2, 3]).issubset(set(marker_labels)):
 			'''Assume markers with ids 0, 1, 2 and 3 are at corners
@@ -141,7 +141,7 @@ while capture.isOpened():
 	#detect position of markers
 	#corresponding labels are in labels at same index
 	markers, labels = aruco.detectMarkers(unwarped_frame, dictionary)[0:2]
-	frame_with_markers = aruco.drawDetectedMarkers(unwarped_frame, markers[0])
+	frame_with_markers = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers[0])
 
 	# for marker, label in zip(markers, labels):
 	# 	print(marker, label)
