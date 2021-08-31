@@ -16,7 +16,7 @@ import cv2.aruco as aruco
 #Dictionary MUST be same as the one used for detection of markers
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_5X5_50)
 
-for i in range(0, 6):
+for i in range(0, 20):
 	markerImage = aruco.drawMarker(dictionary, i, 200)
 	#Marker images stored with same name as their ids
 	cv2.imwrite(f"markers/{i}.jpg", markerImage)
