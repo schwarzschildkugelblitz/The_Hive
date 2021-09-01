@@ -20,9 +20,13 @@ No touching of the robots hardware/software is allowed once the race starts - Co
 Overall Arena size is 5 x 10ft
 
 ● Each block is 6x6in
+
 ● The grid is 1 cm tape / marking
+
 ● The brown line next to D1, D2, D3 & D4 is a 1-inch height wall
-Judging Criteria for Round I
+
+### Judging Criteria for Round I
+
 Top 100 teams to finish the relay race (shortest time) - make it to Round II
 
 ### Deliverables for Round I
