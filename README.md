@@ -39,7 +39,7 @@ tracked in real-time
 
 ## Team 
 1. Harshit Batra 
-2. Tanmay Vadera
+2. Tanmay Vadhera
 3. Mudit Aggarwal
 4. Harshit Kapoor 
 5. Drishti Adlakha 
@@ -48,6 +48,9 @@ tracked in real-time
 8. Mukul Gupta 
 9. Vikas Poddar 
 10. Soham
+
+## Achitectrue
+![architecure drawio (3)](https://user-images.githubusercontent.com/71646613/132103743-41745243-7242-49e7-9f9f-75c9ba1f0118.png)
 
 ## Mechanical
 
