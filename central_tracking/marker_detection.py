@@ -17,6 +17,29 @@ Dependencies:
 import cv2
 import cv2.aruco as aruco
 import numpy as np
+import time
+
+#time at the begining of program
+set_time = time.time()
+
+def timerandfps  (set_time,Previous_time , req ) :
+
+	'''
+	the fuction creates timer and gives current fps 
+	
+	returns timer for req = "timer" or "Timer"
+	returns current fps for req = "fps" or "FPS"
+	'''
+
+	Current_time = time.time()
+	timer = int(Current_time -set_time)
+	fps = 1/(Current_time -Previous_time )
+	if req =="timer" or req =="Timer" :
+		return timer 
+	if req =="fps" or req =="FPS" :
+		return fps
+	if req =="Previous_time" :
+		return Current_time
 
 def resize(scale_percent, img):
 	'''
@@ -141,12 +164,19 @@ while capture.isOpened():
 	#detect position of markers
 	#corresponding labels are in labels at same index
 	markers, labels = aruco.detectMarkers(unwarped_frame, dictionary)[0:2]
-	frame_with_markers = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers[0])
+	the_hive_processed_video  = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers[0])
 
+	#adding text to video 
+	cv2.putText(the_hive_processed_video , 'Team Place Holder', (170, 30), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 255, 255),  2, cv2.LINE_4)
+	cv2.putText(the_hive_processed_video , f'Time : {int(timerandfps(set_time , Previous_time , "Timer"))} sec ', (10, 50), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
+	cv2.putText(the_hive_processed_video , f'FPS : {int(timerandfps(set_time , Previous_time , req = "fps"))} ', (10, 70), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
+	cv2.putText(the_hive_processed_video , 'If you believe in yourself and have dedication and pride , and you never quit, you will be a winner.', (70 , 465), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
+	cv2.putText(the_hive_processed_video , ' The price of victory is high but so are the rewards', (175, 475), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
+	Previous_time = timerandfps(set_time , Previous_time , "Previous_time")
 	# for marker, label in zip(markers, labels):
-	# 	print(marker, label)
+	# print(marker, label)
 
-	cv2.imshow("Top view frame with Markers", frame_with_markers)
+	cv2.imshow("Top view frame with Markers", the_hive_processed_video )
 
 	#exit condition, press key 'd'
 	if cv2.waitKey(20) & 0xFF == ord('d'):
