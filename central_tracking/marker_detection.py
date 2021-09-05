@@ -20,6 +20,7 @@ import cv2.aruco as aruco
 import numpy as np
 import time
 
+
 #time at the begining of program
 set_time = time.time()
 
@@ -69,117 +70,130 @@ def unwarp(img, src, dst):
 
 	returns unwarped image
 	'''
-    h, w = img.shape[:2]
-    # use cv2.getPerspectiveTransform() to get M, the transform matrix, and Minv, the inverse
-    M = cv2.getPerspectiveTransform(src, dst)
-    # use cv2.warpPerspective() to warp your image to a top-down view
-    warped = cv2.warpPerspective(img, M, (w, h), flags=cv2.INTER_LINEAR)
-    return warped
+	h, w = img.shape[:2]
+	# use cv2.getPerspectiveTransform() to get M, the transform matrix, and Minv, the inverse
+	M = cv2.getPerspectiveTransform(src, dst)
+	# use cv2.warpPerspective() to warp your image to a top-down view
+	warped = cv2.warpPerspective(img, M, (w, h), flags=cv2.INTER_LINEAR)
+	return warped
 
-#predefined dictionary for ArUco markers
-#for Robot application 5x5 grid with upto 50 Ids is choses
-#for list of predefined dictionaries: https://docs.opencv.org/3.4/dc/df7/dictionary_8hpp.html
-#This MUST be same as the one chosen to make the markers
-dictionary = aruco.getPredefinedDictionary(aruco.DICT_5X5_50)
 
-#Initiate video capture at camera 0, if more than 1 camera
-#change accordingly
-camera = 0
-capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
 
-#width and height of the rectangular arena
-#aspect ratio needs to maintained
-width, height = 240, 365
+class Camera:
 
-#initialized corners of border markers
-src = np.float32([(0, 0), (0, 0), (0, 0), (0, 0)])
-#Destination markers based on aspect ratio of arena
-dst = np.float32([(0, 0), (width, 0), (width, height), (0, height)])
 
-got_corners = False
-while not got_corners:
-	'''
-	capture initial frame when all markers are visible
-	src matrix is set accroding to this initial frame
-	the 4 border markers are put to the corners and cannot be detected henceforth
-	'''
-	#break condition
-	if cv2.waitKey(20) & 0xFF == ord('d'):
-		break
+	def __init__(self, width, height, camera = 0):
+		
+		#predefined dictionary for ArUco markers
+		#for Robot application 5x5 grid with upto 50 Ids is choses
+		#for list of predefined dictionaries: https://docs.opencv.org/3.4/dc/df7/dictionary_8hpp.html
+		#This MUST be same as the one chosen to make the markers
+		self.dictionary = aruco.getPredefinedDictionary(aruco.DICT_5X5_50)
 
-	#read frame
-	ret, frame = capture.read()
+		#Initiate video capture at camera 0, if more than 1 camera
+		#change accordingly
+		self.camera = camera
+		self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
 
-	if not ret:
-		raise Exception("Camera Exception")
+		#width and height of the rectangular arena
+		#aspect ratio needs to maintained
+		self.width, self.height = width, height
+		
+		#initialized corners of border markers
+		self.src = np.float32([(0, 0), (0, 0), (0, 0), (0, 0)])
+		#Destination markers based on aspect ratio of arena
+		self.dst = np.float32([(0, 0), (width, 0), (width, height), (0, height)])
 
-	#detect positions of markers
-	marker_positions_and_labels = aruco.detectMarkers(frame, dictionary)[0:2]
-	marker_positions = [marker_positions_and_labels[0][i][0] for i in range(len(marker_positions_and_labels[0]))]
-	marker_labels = [lab[0] for lab in marker_positions_and_labels[1]]
+	def detect_corners(self):
 
-	markers = aruco.drawDetectedMarkers(frame.copy(), marker_positions_and_labels[0])
+		got_corners = False
 
-	#show frame for testing camera position
-	#loop is broken out of when all border markers are detectable
-	cv2.imshow("markers", markers)
-	try:
-		if set([0, 1, 2, 3]).issubset(set(marker_labels)):
-			'''Assume markers with ids 0, 1, 2 and 3 are at corners
-			TOP-LEFT, TOP-RIGHT, BOTTOM-RIGHT and BOTTOM-LEFT respectively
-			only these 4 markers are checked at this stage
-			if these 4 markers are detected, got_corners is set to True
+		while not got_corners:
+			'''
+			capture initial frame when all markers are visible
+			src matrix is set accroding to this initial frame
+			the 4 border markers are put to the corners and cannot be detected henceforth
+			'''
+			#break condition
+			if cv2.waitKey(20) & 0xFF == ord('d'):
+				break
 
-			TOP-LEFT corner of TOP-LEFT marker is considered
-			TOP-RIGHT corner of TOP-RIGHT marker is considered
-			BOTTOM-RIGHT corner of BOTTOM-RIGHT marker is considered
-			BOTTOM-LEFT corner of BOTTOM-LEFT marker is considered'''
-			got_corners = True
-			for i in range(len(marker_labels)):
-				label = marker_labels[i]
-				if label < 4:
-					#update src depending on label of 4 markers
-					src[label] = (marker_positions[i][label][0], marker_positions[i][label][1])
-	except:
-		continue
+			#read frame
+			ret, frame = self.capture.read()
+			# frame = cv2.flip(frame, 1)
 
-#destroy framing window
-cv2.destroyAllWindows()
+			if not ret:
+				raise Exception("Camera Exception")
 
-while capture.isOpened():
-	'''
-	unwarped view of arena is captured and markers are detected
-	border markers cannot be detected
-	Markers inside the arena are detected and positions are stored in 'markers' list
-	'''
-	ret, frame = capture.read()
+			#detect positions of markers
+			marker_positions_and_labels = aruco.detectMarkers(frame, self.dictionary)[0:2]
 
-	cv2.imshow("original", frame)
-	#image cannot be flipped
-	# frame = cv2.flip(frame, 1)
+			if marker_positions_and_labels and marker_positions_and_labels[1] is not None:
+				marker_positions = [marker_positions_and_labels[0][i][0] for i in range(len(marker_positions_and_labels[0]))]
+				marker_labels = [lab[0] for lab in marker_positions_and_labels[1]]
+			else:
+				marker_positions = []
+				marker_labels = []
 
-	#unwarp image and crop according to arena aspect ratio
-	#so markers appear to be square and not skewed rectangles
-	unwarped_frame = unwarp(frame, src, dst)[:height, :width]
+			markers = aruco.drawDetectedMarkers(frame.copy(), marker_positions_and_labels[0])
 
-	#detect position of markers
-	#corresponding labels are in labels at same index
-	markers, labels = aruco.detectMarkers(unwarped_frame, dictionary)[0:2]
-	the_hive_processed_video  = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers[0])
+			#show frame for testing camera position
+			#loop is broken out of when all border markers are detectable
+			cv2.imshow("markers", markers)
+			# try:
+			if set([0, 1, 2, 3]).issubset(set(marker_labels)):
+				'''Assume markers with ids 0, 1, 2 and 3 are at corners
+				TOP-LEFT, TOP-RIGHT, BOTTOM-RIGHT and BOTTOM-LEFT respectively
+				only these 4 markers are checked at this stage
+				if these 4 markers are detected, got_corners is set to True
 
-	#adding text to video 
-	cv2.putText(the_hive_processed_video , 'Team Place Holder', (170, 30), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 255, 255),  2, cv2.LINE_4)
-	cv2.putText(the_hive_processed_video , f'Time : {int(timerandfps(set_time , Previous_time , "Timer"))} sec ', (10, 50), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
-	cv2.putText(the_hive_processed_video , f'FPS : {int(timerandfps(set_time , Previous_time , req = "fps"))} ', (10, 70), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
-	cv2.putText(the_hive_processed_video , 'If you believe in yourself and have dedication and pride , and you never quit, you will be a winner.', (70 , 465), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
-	cv2.putText(the_hive_processed_video , ' The price of victory is high but so are the rewards', (175, 475), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
-	Previous_time = timerandfps(set_time , Previous_time , "Previous_time")
-	# for marker, label in zip(markers, labels):
-	# print(marker, label)
+				TOP-LEFT corner of TOP-LEFT marker is considered
+				TOP-RIGHT corner of TOP-RIGHT marker is considered
+				BOTTOM-RIGHT corner of BOTTOM-RIGHT marker is considered
+				BOTTOM-LEFT corner of BOTTOM-LEFT marker is considered'''
+				got_corners = True
+				for i in range(len(marker_labels)):
+					label = marker_labels[i]
+					if label < 4:
+						#update src depending on label of 4 markers
+						self.src[label] = (marker_positions[i][label][0], marker_positions[i][label][1])
+			# except:
+			# 	continue
 
-	cv2.imshow("Top view frame with Markers", the_hive_processed_video )
+		#destroy framing window
+		cv2.destroyAllWindows()
 
-	#exit condition, press key 'd'
-	if cv2.waitKey(20) & 0xFF == ord('d'):
-		break
-capture.release()
+	def detect_markers(self):
+		'''
+		unwarped view of arena is captured and markers are detected
+		border markers cannot be detected
+		Markers inside the arena are detected and positions are stored in 'markers' list
+		'''
+		Previous_time = time.time()
+
+		ret, frame = self.capture.read()
+
+		cv2.imshow("original", frame)
+		#image cannot be flipped
+		# frame = cv2.flip(frame, 1)
+
+		#unwarp image and crop according to arena aspect ratio
+		#so markers appear to be square and not skewed rectangles
+		unwarped_frame = unwarp(frame, self.src, self.dst)[:self.height, :self.width]
+
+		#detect position of markers
+		#corresponding labels are in labels at same index
+		markers, labels = aruco.detectMarkers(unwarped_frame, self.dictionary)[0:2]
+		# if markers:
+		the_hive_processed_video  = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
+
+		#adding text to video 
+		cv2.putText(the_hive_processed_video , 'Team Place Holder', (170, 30), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 255, 255),  2, cv2.LINE_4)
+		cv2.putText(the_hive_processed_video , f'Time : {int(timerandfps(set_time , Previous_time , "Timer"))} sec ', (10, 50), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
+		cv2.putText(the_hive_processed_video , f'FPS : {int(timerandfps(set_time , Previous_time , req = "fps"))} ', (10, 70), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 255, 255),  2, cv2.LINE_4)
+		cv2.putText(the_hive_processed_video , 'If you believe in yourself and have dedication and pride , and you never quit, you will be a winner.', (70 , 465), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
+		cv2.putText(the_hive_processed_video , ' The price of victory is high but so are the rewards', (175, 475), cv2.FONT_HERSHEY_SIMPLEX , 0.3, (0, 255, 255),  1, cv2.LINE_4)
+		Previous_time = timerandfps(set_time , Previous_time , "Previous_time")
+
+		cv2.imshow("Top view frame with Markers", the_hive_processed_video )
+		return markers, labels
