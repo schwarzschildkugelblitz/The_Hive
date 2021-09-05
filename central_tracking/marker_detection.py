@@ -105,6 +105,14 @@ class Camera:
 		self.dst = np.float32([(0, 0), (width, 0), (width, height), (0, height)])
 
 	def detect_corners(self):
+		"""
+		Detect the aruco markers in the corner of the image, 
+		the requisite pattern is:
+		label 0 					label 1
+
+
+		label 3 					label 2
+		"""
 
 		got_corners = False
 
@@ -167,7 +175,7 @@ class Camera:
 		'''
 		unwarped view of arena is captured and markers are detected
 		border markers cannot be detected
-		Markers inside the arena are detected and positions are stored in 'markers' list
+		Markers inside the arena are detected and positions are stored and returned in 'markers' list
 		'''
 		Previous_time = time.time()
 
