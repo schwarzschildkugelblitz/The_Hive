@@ -57,7 +57,9 @@ tracked in real-time
 ![architecure drawio (3)](https://user-images.githubusercontent.com/71646613/132103743-41745243-7242-49e7-9f9f-75c9ba1f0118.png)
 ### Queen Tracking System 
 ### Transmission System
-###  
+### Worker bee 
+![WhatsApp Image 2021-09-06 at 4 18 25 PM](https://user-images.githubusercontent.com/71646613/132313659-b21e1d5a-814b-4970-8ea3-4ba18a52b707.jpeg)
+
 
 ## Mechanical
 
