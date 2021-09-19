@@ -2,6 +2,8 @@
 The Following is Team Placeholders Solution to Flipkart's Grid 3.0
 
 ## About Grid 3.0
+![60ccb1a9ee892_d2c__1920-557_01](https://user-images.githubusercontent.com/71646613/132248707-44581bff-25d0-4527-8e1e-d93d26eb45cb.jpg)
+
 GRiD is Flipkart’s Flagship Engineering Campus Challenge which provides you the opportunity to apply your technical knowledge and skills, to compete and complete key challenges.
 
 In its third edition, Flipkart GRiD becomes bigger & better, bringing Live Problem Statements from the world of E-Commerce to the brightest minds of India and lets you put your capabilities to the ultimate test.
@@ -37,7 +39,9 @@ can be shot with a handheld or phone camera
 4. Uninterrupted Video of Live Image Processing - with Timer overlayed to show how robots are being
 tracked in real-time
 
-## Team 
+## About The Team 
+![Untitled design](https://user-images.githubusercontent.com/71646613/132249350-38f5f4f0-2d01-4246-bfad-973f2d42afb8.png)
+
 1. Harshit Batra 
 2. Tanmay Vadhera
 3. Mudit Aggarwal
@@ -50,7 +54,13 @@ tracked in real-time
 10. Soham
 
 ## Achitectrue
-![architecure drawio (3)](https://user-images.githubusercontent.com/71646613/132103743-41745243-7242-49e7-9f9f-75c9ba1f0118.png)
+![architecure drawio (4)](https://user-images.githubusercontent.com/71646613/132809811-aee1635b-4d04-47fa-be5f-8f656493af32.png)
+
+### Queen Tracking System 
+### Transmission System
+### Worker bee 
+![WhatsApp Image 2021-09-06 at 4 18 25 PM](https://user-images.githubusercontent.com/71646613/132313659-b21e1d5a-814b-4970-8ea3-4ba18a52b707.jpeg)
+
 
 ## Mechanical
 
