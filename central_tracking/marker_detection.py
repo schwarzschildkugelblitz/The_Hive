@@ -78,7 +78,6 @@ def unwarp(img, src, dst):
 	return warped
 
 
-
 class Camera:
 
 
@@ -94,6 +93,9 @@ class Camera:
 		#change accordingly
 		self.camera = camera
 		self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
+		
+		self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+		self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
 		#width and height of the rectangular arena
 		#aspect ratio needs to maintained
@@ -103,6 +105,7 @@ class Camera:
 		self.src = np.float32([(0, 0), (0, 0), (0, 0), (0, 0)])
 		#Destination markers based on aspect ratio of arena
 		self.dst = np.float32([(0, 0), (width, 0), (width, height), (0, height)])
+
 
 	def detect_corners(self):
 		"""
@@ -129,11 +132,13 @@ class Camera:
 			#read frame
 			ret, frame = self.capture.read()
 			# frame = cv2.flip(frame, 1)
+			# print(frame.shape[:2])
 
 			if not ret:
 				raise Exception("Camera Exception")
 
 			#detect positions of markers
+
 			marker_positions_and_labels = aruco.detectMarkers(frame, self.dictionary)[0:2]
 
 			if marker_positions_and_labels and marker_positions_and_labels[1] is not None:
@@ -147,8 +152,9 @@ class Camera:
 
 			#show frame for testing camera position
 			#loop is broken out of when all border markers are detectable
-			cv2.imshow("markers", markers)
-			# try:
+			markers_to_show = resize(50, markers)
+			cv2.imshow("markers", markers_to_show)
+			# try:	
 			if set([0, 1, 2, 3]).issubset(set(marker_labels)):
 				'''Assume markers with ids 0, 1, 2 and 3 are at corners
 				TOP-LEFT, TOP-RIGHT, BOTTOM-RIGHT and BOTTOM-LEFT respectively
@@ -164,12 +170,36 @@ class Camera:
 					label = marker_labels[i]
 					if label < 4:
 						#update src depending on label of 4 markers
-						self.src[label] = (marker_positions[i][label][0], marker_positions[i][label][1])
+						self.src[label] = (marker_positions[i][(label + 2)%4][0], marker_positions[i][(label + 2)%4][1])
 			# except:
 			# 	continue
 
 		#destroy framing window
 		cv2.destroyAllWindows()
+
+	def test_markers(self):
+		
+		ret, frame = self.capture.read()
+		marker_positions = []
+		marker_labels = []
+
+		if not ret:
+			raise Exception("Camera Exception")
+
+		#detect positions of markers
+		aruco.DetectorParameters_create(perspectiveRemoveIgnoredMarginPerCell = 0.1)
+		marker_positions_and_labels = aruco.detectMarkers(frame, self.dictionary)[0:2]
+
+		if marker_positions_and_labels and marker_positions_and_labels[1] is not None:
+			marker_positions = [marker_positions_and_labels[0][i][0] for i in range(len(marker_positions_and_labels[0]))]
+			marker_labels = [lab[0] for lab in marker_positions_and_labels[1]]
+
+		markers = aruco.drawDetectedMarkers(frame.copy(), marker_positions_and_labels[0])
+		test_markers = resize(50, markers)
+		cv2.imshow("test_markers", test_markers)
+
+		return marker_positions, marker_labels
+
 
 	def detect_markers(self):
 		'''
@@ -181,7 +211,7 @@ class Camera:
 
 		ret, frame = self.capture.read()
 
-		cv2.imshow("original", frame)
+		# cv2.imshow("original", frame)
 		#image cannot be flipped
 		# frame = cv2.flip(frame, 1)
 
@@ -192,6 +222,7 @@ class Camera:
 		#detect position of markers
 		#corresponding labels are in labels at same index
 		markers, labels = aruco.detectMarkers(unwarped_frame, self.dictionary)[0:2]
+
 		# if markers:
 		the_hive_processed_video  = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
 

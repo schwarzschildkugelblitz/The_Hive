@@ -14,7 +14,7 @@ class Serial_Communication:
     
     def __init__(self, port, baudrate):
         self.arduino = serial.Serial(port=port, baudrate=baudrate)
-        time.sleep(2)
+        # time.sleep(2)
 
     def send(self, byte_string):
         """
