@@ -1,13 +1,25 @@
-#include <ServoTimer2.h>  // the servo library
-#define myAddress 0
-#include <SPI.h>
-#include <RH_NRF24.h>
+/* RECEPTION CODE handles reception , decoding and execution of various commands
+given by central tracking system 
 
-#define LEFT 120
-#define RIGHT 140
+written by Tanmay Vadhera
+and minor changes made by Mudit aggarwal and Harshit Batra 
+
+dependies  
+    - ServoTimer2.h
+    - SPI.h
+    - RH_NRF24.h 
+*/
+
+#include <ServoTimer2.h>  // the servo library
+#include <SPI.h>  // SPI library 
+#include <RH_NRF24.h> //NRF library 
+
+#define Worker_bee_Address 0 
+#define LEFT 120 // speed of left motor
+#define RIGHT 140 // spped of right motor
 
 RH_NRF24 nrf24 (A4,A3);
-ServoTimer2 myservo; 
+ServoTimer2 flipper_servo; 
 
 class motor 
 {
@@ -78,8 +90,8 @@ void unpack (uint8_t pack[])
 void setup() 
 {
   pinMode(A0,OUTPUT);
-  myservo.attach(3);
-  myservo.write(1120);
+  flipper_servo.attach(3);
+  flipper_servo.write(1120);
   delay(1000);
   pinMode (10,OUTPUT);
   digitalWrite(10,0);
@@ -128,7 +140,7 @@ void loop()
       Serial.print(" ");
       Serial.println(spd1);
                  
-      if(add == myAddress) // do anything only if the address matches
+      if(add == Worker_bee_Address) // do anything only if the address matches
       {
         if (spd1>=0 && spd1 <= 55)
         {
