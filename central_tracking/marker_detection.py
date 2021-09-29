@@ -22,7 +22,7 @@ import numpy as np
 import time
 
 # time at the beginning of program
-set_time = 0
+
 
 
 def timer_and_fps(set_time, previous_time, req):
@@ -96,6 +96,7 @@ class Camera:
         # Initiate video capture at camera 0, if more than 1 camera
         # change accordingly
         self.camera = camera
+        self.set_time = 0
         self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
         self.output = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
                                       (width, height + extra_height))
@@ -187,7 +188,7 @@ class Camera:
 
         # destroy framing window
         cv2.destroyAllWindows()
-        set_time = time.time()
+        self.set_time = time.time()
 
     def test_markers(self):
         """
@@ -217,6 +218,7 @@ class Camera:
         cv2.imshow("markers", markers_to_show)
 
         return markers, labels
+
 
     def detect_markers(self):
         """
@@ -248,11 +250,11 @@ class Camera:
         # adding text to video
         cv2.putText(the_hive_processed_video, 'Team Place Holder', (550, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
                     (0, 255, 255), 2, cv2.LINE_4)
-        cv2.putText(the_hive_processed_video, f'Time : {int(timer_and_fps(set_time, previous_time, "Timer"))} sec ',
+        cv2.putText(the_hive_processed_video, f'Time : {int(timer_and_fps(self.set_time, previous_time, "Timer"))} sec ',
                     (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
-        cv2.putText(the_hive_processed_video, f'FPS : {int(timer_and_fps(set_time, previous_time, req="fps"))} ',
+        cv2.putText(the_hive_processed_video, f'FPS : {int(timer_and_fps(self.set_time, previous_time, req="fps"))} ',
                     (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
-        previous_time = timer_and_fps(set_time, previous_time, "Previous_time")
+        previous_time = timer_and_fps(self.set_time, previous_time, "Previous_time")
 
         cv2.imshow("Top view frame with Markers", the_hive_processed_video)
 

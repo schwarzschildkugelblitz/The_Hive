@@ -5,7 +5,7 @@ robots = [7, 8, 9, 10]  # marker labels of robots
 
 # Path for each robot to follow
 path = np.array([
-    np.array([( 8.5/20, 0.5/10), ( 8.5/20, 8.5/10), ( 2.5/20, 8.5/10), ( 8.5/20, 8.5/10), ( 8.5/20, 0.5/10)], np.float32),
+    np.array([( 8.5/20, 0.5/10), ( 8.5/20, 8.5/10), ( 2.5/20, 8.5/10), ( 8.5/20, 8.5/10), ( 8.5/20, 0.5/10)]),
     np.array([( 9.5/20, 0.5/10), ( 9.5/20, 9.5/10), ( 2.5/20, 9.5/10), ( 9.5/20, 9.5/10), ( 9.5/20, 0.5/10)]),
     np.array([(10.5/20, 0.5/10), (10.5/20, 9.5/10), (17.5/20, 9.5/10), (10.5/20, 9.5/10), (10.5/20, 0.5/10)]),
     np.array([(11.5/20, 0.5/10), (11.5/20, 8.5/10), (17.5/20, 8.5/10), (11.5/20, 8.5/10), (11.5/20, 0.5/10)])
@@ -18,7 +18,7 @@ bot_commands = [['right', 'drop', 'left', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 50
+threshold = 70
 
 
 def special_command(address, bot_command):
@@ -33,11 +33,12 @@ def special_command(address, bot_command):
     """
 
     commands = {'left': 56, 'right': 57, 'stop': 58, 'drop': 59}  # speed
+    delay = {'left': 1, 'right': 1, 'stop': 0, 'drop': 3}
 
     command_num = commands[bot_command] * 4
     command_num = command_num + address
 
-    return bytes(str(command_num) + ' ' + '0' + '\n', 'utf-8')
+    return bytes(str(command_num) + ' ' + '0' + '\n', 'utf-8'), delay[bot_command]
 
 
 def distance(p1, p2):
@@ -101,15 +102,18 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.02
-        self.Ki = 0.02
-        self.Kd = 0.008
-        self.N = 34
+        self.Kp = 0.0266
+        self.Ki = 0.0031
+        self.Kd = 0.005
+        self.N = 13.97
         self.last_time = time()
 
         # to hold id of current bot and current step that bot is on
         self.current_bot = 0
         self.current_step = 0
+
+        self.transition_begin = time()
+        self.transition_delay = 0
 
     def command(self, markers, labels):
         """
@@ -139,7 +143,8 @@ class ControlSystem:
 
         # Set current path and current target of current robot
         # changes after each step
-        current_path = (path[self.current_bot][self.current_step], path[self.current_bot][self.current_step + 1])
+        # current_path = (path[self.current_bot][self.current_step], path[self.current_bot][self.current_step + 1])
+        current_path = (return_center(self.markers[self.current_bot]), path[self.current_bot][self.current_step + 1])
         current_target = path[self.current_bot][self.current_step + 1]
 
         # last_angle = self.angles[self.current_bot]
@@ -151,15 +156,13 @@ class ControlSystem:
         if dist < threshold:
             # if robot reached current target, a special command needs to be issued
 
-            to_return = special_command(self.current_bot, bot_commands[self.current_bot][self.current_step])
+            self.transition_begin = time()
+            to_return, self.transition_delay = \
+                special_command(self.current_bot, bot_commands[self.current_bot][self.current_step])
             self.angles[self.current_bot] = 0.0
 
             # increment current step so target and path can be updated
             self.current_step = (self.current_step + 1) % 4
-
-            # PID variables need to be re-initialized as path changed
-            self.integrator_state[self.current_bot] = 0.0
-            self.filter_state[self.current_bot] = 0.0
 
             # if robot completed all its steps, increment current robot
             if self.current_step == 0:
@@ -172,6 +175,11 @@ class ControlSystem:
                              current_path[0], current_path[1])
         # print(angle)
         self.angles[self.current_bot] = np.round(angle, decimals = 1)
+
+        if time() - self.transition_begin < self.transition_delay:
+            # PID variables need to be re-initialized as path changed
+            self.integrator_state[self.current_bot] = 0.0
+            # self.filter_state[self.current_bot] = 0.0
 
         # speed offset between left and right motors, calculated through PID
         speed = self.pid()

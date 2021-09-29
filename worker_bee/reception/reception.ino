@@ -14,8 +14,8 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 0 
-#define LEFT 120 // speed of left motor
+#define Worker_bee_Address 0
+#define LEFT 123 // speed of left motor
 #define RIGHT 140 // spped of right motor
 
 RH_NRF24 nrf24 (A4,A3);
@@ -65,7 +65,7 @@ class motor
     digitalWrite(pin2,0);
   }
 
-}L(9, 10),R(6,5); // instances
+}L(10, 9),R(6,5); // instances
 
 
 uint8_t add,sign,spd2,misc;
@@ -107,9 +107,9 @@ void setup()
   if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
     Serial.println("setRF failed");    
   
-  myservo.write(-130);
+  flipper_servo.write(-130);
   delay(1000);  
-  myservo.write(1120);
+  flipper_servo.write(1120);
 
 //  R.move(RIGHT+(int)spd1,0);
 //  L.move(LEFT-(int)spd1,0);
@@ -129,16 +129,16 @@ void loop()
     if (nrf24.recv(buf, &len))
     {
 
-      Serial.print(buf[0]);
-      Serial.print(" ");
-      Serial.print(buf[1]);
+//      Serial.print(buf[0]);
+//      Serial.print(" ");
+//      Serial.print(buf[1]);
         
       unpack(buf);
 
-      Serial.print(" -> ");
-      Serial.print(add);
-      Serial.print(" ");
-      Serial.println(spd1);
+//      Serial.print(" -> ");
+//      Serial.print(add);
+//      Serial.print(" ");
+//      Serial.println(spd1);
                  
       if(add == Worker_bee_Address) // do anything only if the address matches
       {
@@ -150,41 +150,51 @@ void loop()
 //          delay(500);
 //          digitalWrite(A0,LOW);
 //          delay(500);
-           
-          R.move(RIGHT + (int)spd1,0);
-          L.move(LEFT  - (int)spd1,0);
+          Serial.print(RIGHT + spd1);
+          Serial.print(' ');
+          Serial.println(LEFT  - spd1);
+          
+          R.move(RIGHT + spd1,0);
+          L.move(LEFT  - spd1,0);
           
         }
         // mode instances          
         else if(spd1 == 56)  
         {   // left
-          L.stp();
-          R.stp();
-          delay(100);
-          L.move(0,150);
-          R.move(150,0);
-          delay(290);
-          L.move(150,0);
-          R.move(0,150);
-          delay(20);
-          L.stp();
-          R.stp();
-          delay(50);
+            L.move(0,200);
+            R.move(0,200);
+            delay(30);
+            L.stp();
+            R.stp();
+            delay(100);
+            L.move(0,150);
+            R.move(150,0);
+            delay(340);
+            L.move(150,0);
+            R.move(0,150);
+            delay(20);
+            L.stp();
+            R.stp();
+            delay(50);
+
         }
         else if (spd1 == 57)
         {   // right
-          L.stp();
-          R.stp();
-          delay(100);
-          L.move(150,0);
-          R.move(0,150);
-          delay(330);
-          L.move(0,150);
-          R.move(150,0);
-          delay(20);
-          L.stp();
-          R.stp();
-          delay(50);
+            L.move(0,200);
+            R.move(0,200);
+            delay(30);
+            L.stp();
+            R.stp();
+            delay(100);
+            L.move(150,0);
+            R.move(0,150);
+            delay(310);
+            L.move(0,150);
+            R.move(150,0);
+            delay(20);
+            L.stp();
+            R.stp();
+            delay(50);
         }
         else if (spd1 == 58)
         {   // stop
@@ -193,6 +203,9 @@ void loop()
         }
         else if(spd1 == 59){ 
           // drop
+          L.move(0,200);
+          R.move(0,200);
+          delay(30);
           L.stp();
           R.stp();
           delay(150);
@@ -202,22 +215,19 @@ void loop()
           delay(640);
           L.stp();
           R.stp();
-          myservo.write(-130);
+          flipper_servo.write(-130);
           delay(1000);  
-          myservo.write(1120);
+          flipper_servo.write(1120);
           delay(100);
-          L.move(0,105);
-          R.move(0,110);
-          delay(640);
-          L.move(0,150);
-          R.move(150,0);
-          delay(450);
           L.move(150,0);
           R.move(0,150);
+          delay(520);
+          L.move(0,150);
+          R.move(150,0);
           delay(20);
           L.stp();
           R.stp();
-          delay(50);       
+          delay(50);
         }
         else if(spd1 == 60)
         // slow
