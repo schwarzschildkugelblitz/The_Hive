@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
 from time import time
 
 robots = [7, 8, 9, 10]  # marker labels of robots
@@ -19,6 +22,9 @@ bot_commands = [['right', 'drop', 'left', 'stop'],
 
 # proximity threshold to the target coordinate of path
 threshold = 70
+
+# plotting graphs 
+
 
 
 def special_command(address, bot_command):
@@ -42,7 +48,7 @@ def special_command(address, bot_command):
 
 
 def distance(p1, p2):
-    # Returns distance between 2 points
+    """Returns distance between 2 points"""
 
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 
@@ -218,4 +224,4 @@ class ControlSystem:
         speed = V * 50 / 1.29
         return np.round(speed)
 
-
+    # def graphs_for_nerds (self) :
