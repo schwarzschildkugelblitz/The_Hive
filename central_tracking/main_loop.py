@@ -10,13 +10,13 @@ Dependencies:
     pip install opencv
 
     marker_detection
-    serial_communication
     control_system
+    serial_communication
 """
 
 import cv2
 from marker_detection import Camera
-from serial_communication import Serial_Communication
+from serialcommunication import SerialCommunication
 from control_system import ControlSystem
 
 """
@@ -25,12 +25,13 @@ determined manually as it is a function of required/available
 resolution of camera and absolute width and height of arena
 """
 # width, height = int(44*800/34.5), int(24*800/34.5)
-width, height = 1400, 700
+width, height = 600, 300
+# width, height = 1400, 700
 extra_height = 35
 
 # initializing the 3 main components of tracking system
-camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
-arduino = Serial_Communication("COM4", 115200)
+camera = Camera(width=width, height=height, camera=0, extra_height=extra_height)
+# arduino = SerialCommunication("COM4", 115200)
 control = ControlSystem(width, height)
 
 
@@ -49,7 +50,7 @@ def main():
 
         # Placeholder
         # print(signal)
-        arduino.send(signal)
+        # arduino.send(signal)
 
         # exit condition, press key 'd'
         if cv2.waitKey(22) & 0xFF == ord('d'):

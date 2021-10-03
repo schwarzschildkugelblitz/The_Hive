@@ -3,9 +3,9 @@ import serial
 import time
 
 
-class Serial_Communication:
+class SerialCommunication:
     """
-    Handels serial communication with the transmitter Arduino
+    Handles serial communication with the transmitter Arduino
     at specified port and baudrate
 
     Since no signal is received but only transmitted, there is 
@@ -14,7 +14,8 @@ class Serial_Communication:
     
     def __init__(self, port, baudrate):
         self.arduino = serial.Serial(port=port, baudrate=baudrate)
-        # time.sleep(2)
+        # time.sleep(2) # sleep required to initialize the serial port
+        # not required if port already initialized
 
     def send(self, byte_string):
         """

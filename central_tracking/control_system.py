@@ -151,7 +151,9 @@ class ControlSystem:
 
         # distance between current robot and current target of robot
         dist = distance(return_center(self.markers[self.current_bot]), current_target)
-        print(return_center(self.markers[self.current_bot]), current_target, distance)
+        print("Center of current robot:", return_center(self.markers[self.current_bot]),\
+              "\nCoordinates of current target:", current_target,\
+              "Distance of robot from current target:", dist)
 
         if dist < threshold:
             # if robot reached current target, a special command needs to be issued
@@ -173,8 +175,8 @@ class ControlSystem:
         # angle between current path and robot
         angle = return_angle(self.markers[self.current_bot][3], self.markers[self.current_bot][0],
                              current_path[0], current_path[1])
-        # print(angle)
-        self.angles[self.current_bot] = np.round(angle, decimals = 1)
+        print("Angle current robot with line joining the target to robot:", angle)
+        self.angles[self.current_bot] = np.round(angle, decimals=1)
 
         if time() - self.transition_begin < self.transition_delay:
             # PID variables need to be re-initialized as path changed

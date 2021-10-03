@@ -194,6 +194,8 @@ class Camera:
         """
         Tests marker detection without setting got_markers variable
         for debugging and testing
+
+        markers are not unwarped, just to test camera and marker coordinates
         """
         ret, frame = self.capture.read()
 
@@ -225,6 +227,8 @@ class Camera:
         unwarped view of arena is captured and markers are detected
         border markers cannot be detected
         Markers inside the arena are detected and positions are stored and returned in 'markers' list
+
+        Inner corners of every marker is considered and rectangle extracted and unwarped
         """
         previous_time = time.time()
 
