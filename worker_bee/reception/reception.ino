@@ -230,10 +230,10 @@ void loop()
           delay(50);
         }
         else if(spd1 == 60)
-        // slow
+        // right drop
         {}
         else if (spd1 == 61)
-        // reverse
+        // left drop
         {}
         else if (spd1 == 62)
         {}

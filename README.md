@@ -54,7 +54,8 @@ tracked in real-time
 10. Soham
 
 ## Achitectrue
-![architecure drawio (4)](https://user-images.githubusercontent.com/71646613/132809811-aee1635b-4d04-47fa-be5f-8f656493af32.png)
+![architecure drawio (6)](https://user-images.githubusercontent.com/71646613/135709980-2d786159-101f-438e-b2e5-fd9b1b7bafbc.png)
+
 
 ### Queen Tracking System 
 ### Transmission System

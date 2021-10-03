@@ -98,8 +98,9 @@ class Camera:
         self.camera = camera
         self.set_time = 0
         self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
-        self.output = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
+        self.processed1 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
                                       (width, height + extra_height))
+        self.processed2 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (width, height ))
         self.original = cv2.VideoWriter('original_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (1920, 1080))
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
@@ -221,6 +222,34 @@ class Camera:
 
         return markers, labels
 
+    def processed_video_text(self, src , previous_time) : 
+        cv2.putText(src, 'Team PlaceHolders', (550, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 255), 2, cv2.LINE_4)
+        cv2.putText(src, f'Time : {int(timer_and_fps(self.set_time, previous_time, "Timer"))} sec ',
+                    (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
+        cv2.putText(src, f'FPS : {int(timer_and_fps(self.set_time, previous_time, req="fps"))} ',
+                    (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
+        previous_time = timer_and_fps(self.set_time, previous_time, "Previous_time")
+
+    def virtual_grid(self, src , height , width ) :
+
+        cv2.line(src, (0,height), (width,height), (0,0,255), 1)
+        cv2.line(src,(0,int(height-height/10)),(width,int(height-height/10)),(0,255,0),1)
+        cv2.line(src,(0,int(height-2*(height/10))),(int(width/2-width/10),int(height-2*(height/10))),(0,0,255),1)
+        cv2.line(src,(int(width/2+width/10),int(height-2*(height/10))),(int(width),int(height-2*(height/10))),(0,0,255),1)
+        cv2.line(src,(int(width/2-width/10),int(height-2*(height/10))),(int(width/2-width/10),0),(0,0,255),1)
+        cv2.line(src,(int(width/2+width/10),int(height-2*(height/10))),(int(width/2+width/10),0),(0,0,255),1)
+        cv2.line(src,(int(width/2-width/10),0),(int(width/2+width/10),0),(0,0,255),1)
+        for i in range (1,10) : 
+            cv2.line(src,(int(width/2-width/10),int(i*(height/10))),(int(width/2+width/10),int(i*(height/10))),(0,255,0),1)
+        for i in range (1,20) :
+            cv2.line(src,(int(i*width/20),height),(int((i*width/20)),int(height-2*(height/10))),(0,255,0),1)
+        for i in range (9,12) :
+            cv2.line(src,(int(i*width/20),height),(int((i*width/20)),0),(0,255,0),1)
+        for i in [0,19.999] :
+            cv2.line(src,(int(i*width/20),height),(int((i*width/20)),int(height-2*(height/10))),(0,0,255),1)
+ 
+        
 
     def detect_markers(self):
         """
@@ -250,20 +279,13 @@ class Camera:
         markers, labels = aruco.detectMarkers(unwarped_frame, self.dictionary)[0:2]
 
         the_hive_processed_video = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
-
         # adding text to video
-        cv2.putText(the_hive_processed_video, 'Team Place Holder', (550, 30), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                    (0, 255, 255), 2, cv2.LINE_4)
-        cv2.putText(the_hive_processed_video, f'Time : {int(timer_and_fps(self.set_time, previous_time, "Timer"))} sec ',
-                    (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
-        cv2.putText(the_hive_processed_video, f'FPS : {int(timer_and_fps(self.set_time, previous_time, req="fps"))} ',
-                    (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2, cv2.LINE_4)
-        previous_time = timer_and_fps(self.set_time, previous_time, "Previous_time")
-
+        self.processed_video_text(the_hive_processed_video,previous_time) 
+        the_hive_processed_video_with_grid = the_hive_processed_video.copy()
+        self.virtual_grid(the_hive_processed_video ,self.height , self.width )
         cv2.imshow("Top view frame with Markers", the_hive_processed_video)
-
         # Save videos
-        self.output.write(the_hive_processed_video)
+        self.processed1.write(the_hive_processed_video)
+        self.processed2.write(the_hive_processed_video_with_grid)
         self.original.write(frame)
-
         return markers, labels
