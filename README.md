@@ -51,7 +51,7 @@ tracked in real-time
 7. Rohan Deswal 
 8. Mukul Gupta 
 9. Vikas Poddar 
-10. Soham
+ 10. Soham
 
 ## Achitectrue
 ![architecure drawio (6)](https://user-images.githubusercontent.com/71646613/135709980-2d786159-101f-438e-b2e5-fd9b1b7bafbc.png)
