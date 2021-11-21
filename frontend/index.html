@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Placeholders</title>
+</head>
+
+<body>
+    <nav id="navbar">
+        <div id="logo">
+
+        </div>
+        <div id="name">
+            Placeholders
+        </div>
+    </nav>
+    <main id="main-content" class="flex-column">
+        <div id="display-content" class="flex-row">
+            <div id="video-container">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/ZYzbalQ6Lg8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div id="count-container" class="flex-column">
+                <div id="total-count" class="flex-column">
+                    Total Count
+                    <div id="count-box" class="number-box">110</div>
+                </div>
+                <div id="total-time" class="flex-column">
+                    Total Time
+                    <div id="time-box" class="number-box">220</div>
+                </div>
+            </div>
+        </div>
+        <div id="control-panel" class="flex-row">
+            <div id="pid-control" class="flex-column">
+                <div id="p-container" class="flex-row pid-container">
+                    <div class="slide-container">
+                        <input type="range" min="1" max="100" class="slider" id="p-slider">
+                    </div>
+                    <input type="number" name="p-input" id="p-input" class="pid-input" min="1" max="100">
+                </div>
+                <div id="i-container" class="flex-row pid-container">
+                    <div class="slide-container">
+                        <input type="range" min="1" max="100" class="slider" id="i-slider">
+                    </div>
+                    <input type="number" name="i-input" id="i-input" class="pid-input" min="1" max="100">
+                </div>
+                <div id="d-container" class="flex-row pid-container">
+                    <div class="slide-container">
+                        <input type="range" min="1" max="100" class="slider" id="d-slider">
+                    </div>
+                    <input type="number" name="d-input" id="d-input" class="pid-input" min="1" max="100">
+                </div>
+            </div>
+            <div id="main-control" class="flex-row">
+                <button id="start-btn">Start</button>
+                <button id="stop-btn">Stop</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
+    </main>
+    <script src="app.js"></script>
+</body>
+
+</html>
