@@ -3,6 +3,10 @@
     margin: 0px;
     padding: 0px;
 }
+.body
+{
+    font-family: 'Nunito Sans', sans-serif;
+}
 
 .flex-row {
     display: flex;
@@ -28,9 +32,13 @@
 
 #display-content {
     width: 100%;
-    height: 400px;
-    justify-content: space-around;
+    height: 500px;
+    justify-content: space-between;
     padding: 20px 20px;
+}
+
+#video-container{
+    border-radius: 50px;
 }
 
 #count-container {
@@ -51,7 +59,7 @@
 
 #control-panel {
     width: 100%;
-    height: 200px;
+    height: 20px;
     justify-content: space-evenly;
     padding: 20px 20px;
 }
@@ -129,4 +137,18 @@
 
 #reset-btn {
     background-color: gold  ;
+}
+
+.graph_img{
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+}
+.graph_container{
+    height: 100%;
+    width: 30%;
+}
+.graph{
+    width: 80%;
+    height: 50%;
 }
