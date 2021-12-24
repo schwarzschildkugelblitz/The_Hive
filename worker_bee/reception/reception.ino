@@ -14,9 +14,9 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 0
-#define LEFT 123 // speed of left motor
-#define RIGHT 140 // spped of right motor
+#define Worker_bee_Address 3
+#define LEFT 150 // speed of left motor
+#define RIGHT 150 // spped of right motor
 
 RH_NRF24 nrf24 (A4,A3);
 ServoTimer2 flipper_servo; 
@@ -230,8 +230,16 @@ void loop()
           delay(50);
         }
         else if(spd1 == 60)
-        // right drop
-        {}
+        // left angle
+        {
+          L.stp();
+          R.stp();
+          L.move(150,0);
+          R.move(0,150);
+          delay(200);
+          L.stp();
+          R.stp();
+        }
         else if (spd1 == 61)
         // left drop
         {}
