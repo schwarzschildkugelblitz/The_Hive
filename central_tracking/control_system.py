@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import style
 from time import time
 
 robots = [7, 8, 9, 10]  # marker labels of robots
@@ -21,10 +18,7 @@ bot_commands = [['right', 'drop', 'left', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 70
-
-# plotting graphs 
-
+threshold = 50
 
 
 def special_command(address, bot_command):
@@ -153,12 +147,10 @@ class ControlSystem:
         current_path = (return_center(self.markers[self.current_bot]), path[self.current_bot][self.current_step + 1])
         current_target = path[self.current_bot][self.current_step + 1]
 
-        # last_angle = self.angles[self.current_bot]
-
         # distance between current robot and current target of robot
         dist = distance(return_center(self.markers[self.current_bot]), current_target)
-        print("Center of current robot:", return_center(self.markers[self.current_bot]),\
-              "\nCoordinates of current target:", current_target,\
+        print("Center of current robot:", return_center(self.markers[self.current_bot]),
+              "\nCoordinates of current target:", current_target,
               "Distance of robot from current target:", dist)
 
         if dist < threshold:
@@ -182,7 +174,7 @@ class ControlSystem:
         angle = return_angle(self.markers[self.current_bot][3], self.markers[self.current_bot][0],
                              current_path[0], current_path[1])
         print("Angle current robot with line joining the target to robot:", angle)
-        self.angles[self.current_bot] = np.round(angle, decimals=1)
+        self.angles[self.current_bot] = np.round(angle, decimals=0)
 
         if time() - self.transition_begin < self.transition_delay:
             # PID variables need to be re-initialized as path changed
@@ -198,18 +190,13 @@ class ControlSystem:
 
         return bytes(str(self.data[self.current_bot][0]) + ' ' + str(self.data[self.current_bot][1]) + '\n', 'utf-8')
 
-    def pid(self, last_angle = 0):
+    # noinspection PyPep8Naming
+    def pid(self):
 
         delta_t = time() - self.last_time
         self.last_time = time()
 
         theta = self.angles[self.current_bot]
-
-        # theta_last = last_angle
-
-        # D = (self.Kd * theta - self.filter_state[i]) * self.N
-        # D = self.Kd * (theta - theta_last) / 0.03
-        # V = self.Kp * theta + self.integrator_state[self.current_bot] + D
 
         D = (self.Kd * theta - self.filter_state[self.current_bot]) * self.N
         V = (self.Kp * theta + self.integrator_state[self.current_bot]) + D
