@@ -3,10 +3,76 @@
     margin: 0px;
     padding: 0px;
 }
-.body
+/* .body
 {
     font-family: 'Nunito Sans', sans-serif;
+<<<<<<< Updated upstream
 }
+=======
+} */
+.nav_button {
+    border: none;
+    background-color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+main{
+    display: grid;
+    grid-gap: 10px;
+    padding: 10px;
+}
+.Dashboard_container{
+    background-color: white;
+    padding: 10px;
+    border-radius: 10px;
+    margin : 10px ;
+}
+#video_container{
+    background-color: white;
+    padding: 15px;
+}
+#video_section{
+    grid-column-start: 1;
+    grid-column-end: 3;
+    text-align: center;
+} 
+#Information_and_contol_section {
+    grid-column-start: 3;
+    grid-column-end: 17;
+}
+
+.Video_lable{
+    background-color: white;
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#Control_buttons{
+    background-color: white;
+    text-align: center;
+    padding: 10px;
+}
+.Control_buttons{
+    background-color: white;
+    text-align: center;
+    transition-duration: 0.6s;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 50%;
+    width : 60px ;
+    height:60px ; 
+    margin-inline: 30px;
+}
+#start_button {
+    background-color: white ;
+    font-size: 20px;
+    border-color: green ;
+    border-width: 1px;
+>>>>>>> Stashed changes
 
 .flex-row {
     display: flex;
@@ -24,10 +90,129 @@
     background-color: teal;
     padding: 10px;
 }
+<<<<<<< Updated upstream
+=======
+  
+#about_us_button:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+#Info_container{
+    background-color: #DCDCDC; 
+    text-align: center;
+}
+.Info{
+    display: inline-block;
+    text-align: center;
+    padding: 25px ;
+    border-radius: 10px;
+    margin-inline: 10px;
+}
+#Time_taken{
+    background-color: rgb(85, 190, 255);
+}
+#Time_taken_label{
+    background-color:rgb(85, 190, 255);
+}
+#Time_Left{
+    background-color: rgb(255, 76, 52);
+}
+#Time_Left_label{
+    background-color: rgb(255, 76, 52);
+}
+#Package_sorted{
+    background-color: rgb(2, 216, 2) ;
+}
+#Package_sorted_label{
+    background-color: rgb(2, 216, 2) ;
+}
+#Package_Left{
+    background-color: rgb(255, 166, 0) ;
+}
+#Package_Left_label{
+    background-color: rgb(255, 166, 0) ;
+}
+.info_label{
+    font-size: 20px ;
+    color: white;
+>>>>>>> Stashed changes
 
 #name {
     text-align: center;
     font-size: 30px;
+}
+#PID_container{
+    background-color: white;
+    padding: 25px;
+    display: grid;
+    grid-gap: 15px;
+}
+#PID_container_label{
+    font-size: 30px;
+    text-align: center;
+    background-color: white;
+    margin-bottom: 10px;
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.info_label:hover {
+    font-size : 24px ; 
+    transition-duration: 0.6s;
+}
+
+.PID{
+    display: grid ;
+    text-align: center;
+    justify-content: space-around;
+    padding: 10px;
+    background-color: rgb(255, 145, 209) ;
+    border-radius: 10px;
+}
+.Info_value{
+    background-color: rgb(255, 145, 209) ;
+}
+.slide-container{
+    background-color: rgb(255, 145, 209) ; 
+}
+.PID_label{
+    background-color: rgb(255, 145, 209)
+}
+#Propotional {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+#Integral{
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 3;
+    grid-row-end: 4;
+}
+#Filter_coefficient {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+#Derivative{
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 3;
+    grid-row-end: 4;
+}
+
+
+#Graphs_container{  
+    background-color: white;
+    padding: 25px;
+}
+#Garph_lable{
+    font-size: 30px;
+    text-align: center;
+    background-color: white;
+    margin-bottom: 10px;
 }
 
 #display-content {
