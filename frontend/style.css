@@ -1,4 +1,5 @@
 * {
+    background-color: #E8E8E8;
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
@@ -6,9 +7,6 @@
 /* .body
 {
     font-family: 'Nunito Sans', sans-serif;
-<<<<<<< Updated upstream
-}
-=======
 } */
 .nav_button {
     border: none;
@@ -38,10 +36,21 @@ main{
     grid-column-start: 1;
     grid-column-end: 3;
     text-align: center;
+    grid-row-start: 1;
+    grid-row-end: 4;
 } 
 #Information_and_contol_section {
     grid-column-start: 3;
-    grid-column-end: 17;
+    grid-column-end: 20;
+    display: grid;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+#Data_visualisation_section{
+    grid-column-start: 3;
+    grid-column-end: 20;
+    grid-row-start: 2;
+    grid-row-end: 4;
 }
 
 .Video_lable{
@@ -72,62 +81,112 @@ main{
     font-size: 20px;
     border-color: green ;
     border-width: 1px;
->>>>>>> Stashed changes
 
-.flex-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+}
+#start_button:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+#stop_button{
+    background-color: white ;
+    font-size: 20px;
+    border-color: darkgoldenrod ;
+    border-width: 1px;
+}
+#stop_button:hover {
+    background-color: gold;
+    color: white;
 }
 
-.flex-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+#reset_button {
+    background-color: white ;
+    font-size: 20px;
+    border-color: red ;
+    border-width: 1px;
 
+}
+#reset_button:hover {
+    background-color: #DC143C;
+    color: white;
+}
 #navbar {
-    background-color: teal;
-    padding: 10px;
+    background-color: white; 
+    display: flex;
+    justify-content: space-between;
 }
-<<<<<<< Updated upstream
-=======
+#logo{
+    height: 60px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+#logo_img{ 
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+#name , #about_us {
+    background-color: white;
+}
+#name{
+    background-color: white ;
+    padding: 9px ;
+    font-size: 40px;
+}
+#about_us_button {
+    border: none ;
+    background-color: white;
+    font-size: 20px;
+    padding: 20px;
+
+}
   
 #about_us_button:hover {
     background-color: #4CAF50;
     color: white;
 }
 #Info_container{
-    background-color: #DCDCDC; 
+    grid-column: 2;
+    grid-row: 1;
+    background-color: white; 
     text-align: center;
+    display: grid ;
+    grid-gap: 15px;
+    padding: 25px;
+
 }
 .Info{
-    display: inline-block;
     text-align: center;
-    padding: 25px ;
+    padding: 20px ;
     border-radius: 10px;
-    margin-inline: 10px;
 }
 #Time_taken{
     background-color: rgb(85, 190, 255);
+    grid-column: 1;
+    grid-row: 1;
 }
 #Time_taken_label{
     background-color:rgb(85, 190, 255);
 }
 #Time_Left{
     background-color: rgb(255, 76, 52);
+    grid-column: 2;
+    grid-row: 1;
 }
 #Time_Left_label{
     background-color: rgb(255, 76, 52);
 }
 #Package_sorted{
     background-color: rgb(2, 216, 2) ;
+    grid-column: 1;
+    grid-row: 2;
 }
 #Package_sorted_label{
     background-color: rgb(2, 216, 2) ;
 }
 #Package_Left{
     background-color: rgb(255, 166, 0) ;
+    grid-column: 2;
+    grid-row: 2;
 }
 #Package_Left_label{
     background-color: rgb(255, 166, 0) ;
@@ -135,13 +194,11 @@ main{
 .info_label{
     font-size: 20px ;
     color: white;
->>>>>>> Stashed changes
 
-#name {
-    text-align: center;
-    font-size: 30px;
 }
 #PID_container{
+    grid-column: 1;
+    grid-row: 1;
     background-color: white;
     padding: 25px;
     display: grid;
@@ -151,13 +208,13 @@ main{
     font-size: 30px;
     text-align: center;
     background-color: white;
-    margin-bottom: 10px;
     grid-column-start: 1;
     grid-column-end: 3;
 }
 
 .info_label:hover {
-    font-size : 24px ; 
+    padding:12px;
+    font-size: 22px ;
     transition-duration: 0.6s;
 }
 
@@ -176,7 +233,10 @@ main{
     background-color: rgb(255, 145, 209) ; 
 }
 .PID_label{
-    background-color: rgb(255, 145, 209)
+    background-color: rgb(255, 145, 209) ;
+    color : white ; 
+    font-size: 20px;
+    margin-bottom: 10px;
 }
 #Propotional {
     grid-column-start: 1;
@@ -204,18 +264,32 @@ main{
 }
 
 
-#Graphs_container{  
+#Graphs_container{ 
+    display: grid; 
     background-color: white;
     padding: 25px;
 }
+.Graph{
+    margin: 10px;
+}
+#Angle_time{
+    
+    grid-column: 1;
+}
+#idk_time{
+    grid-column: 2;
+}
+
 #Garph_lable{
+    grid-column-start: 1;
+    grid-column-end: 3;
     font-size: 30px;
     text-align: center;
     background-color: white;
     margin-bottom: 10px;
 }
 
-#display-content {
+/* #display-content {
     width: 100%;
     height: 500px;
     justify-content: space-between;
@@ -223,7 +297,10 @@ main{
 }
 
 #video-container{
-    border-radius: 50px;
+    justify-content: space-around;
+    background-color: white ;
+    padding: 20px;
+    border-radius: 15px;
 }
 
 #count-container {
@@ -260,19 +337,12 @@ main{
     width: 100%;
     justify-content: space-around;
 }
+ */
 
-.slide-container {
-    width: 50%;
-}
-
-.slider {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 15px;
-    border-radius: 5px;
-    background: #d3d3d3;
-    outline: none;
-    opacity: 0.7;
+/* .slider {
+    -webkit-appearance: none ;
+    height: 8px;
+    border-radius: 10px;
     -webkit-transition: .2s;
     transition: opacity .2s;
 }
@@ -280,10 +350,10 @@ main{
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #04AA6D;
+    background: rgb(255, 0, 170);
     cursor: pointer;
 }
 
@@ -293,7 +363,8 @@ main{
     border-radius: 50%;
     background: #04AA6D;
     cursor: pointer;
-}
+}  */
+/* 
 
 .pid-input {
     border-radius: 5px;
@@ -336,4 +407,4 @@ main{
 .graph{
     width: 80%;
     height: 50%;
-}
+} */
