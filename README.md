@@ -67,4 +67,4 @@ tracked in real-time
 
 ## Electronics 
 ### Power system 
-the worker bee is power by powerfull 7.2 V 2500 mah li-ion Battery 
+the worker bee is powered by powerful 7.4 V 2500 mah li-ion Battery 
