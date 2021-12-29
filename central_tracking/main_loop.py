@@ -13,7 +13,7 @@ Dependencies:
     control_system
     serial_communication
 """
-
+import time
 import cv2
 from marker_detection import Camera
 from serialcommunication import SerialCommunication
@@ -26,8 +26,8 @@ resolution of camera and absolute width and height of arena
 """
 # width, height = int(44*800/34.5), int(24*800/34.5)
 # width, height = 600, 300
-width, height = 600, 500
-extra_height = 15
+width, height = 750, 700
+extra_height = 10
 
 # initializing the 3 main components of tracking system
 camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
@@ -53,7 +53,7 @@ def main():
         arduino.send(signal)
 
         # exit condition, press key 'd'
-        if cv2.waitKey(22) & 0xFF == ord('d'):
+        if cv2.waitKey(20) & 0xFF == ord('d'):
             break
 
     camera.capture.release()

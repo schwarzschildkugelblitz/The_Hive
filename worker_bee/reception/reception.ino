@@ -14,9 +14,9 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 3
-#define LEFT 150 // speed of left motor
-#define RIGHT 150 // spped of right motor
+#define Worker_bee_Address 1
+#define LEFT 125 // speed of left motor
+#define RIGHT 150 // speed of right motor
 
 RH_NRF24 nrf24 (A4,A3);
 ServoTimer2 flipper_servo; 
@@ -117,7 +117,7 @@ void setup()
 }
 
 uint8_t len;
-
+unsigned int num_trans = 0;
 void loop()
 {
 //  myservo.write(1130);
@@ -128,20 +128,30 @@ void loop()
   
     if (nrf24.recv(buf, &len))
     {
-
+        num_trans+=1;
+        
 //      Serial.print(buf[0]);
 //      Serial.print(" ");
 //      Serial.print(buf[1]);
         
       unpack(buf);
 
-//      Serial.print(" -> ");
-//      Serial.print(add);
-//      Serial.print(" ");
-//      Serial.println(spd1);
+      Serial.print(" -> ");
+      Serial.print(add);
+      Serial.print(" ");
+      Serial.println(spd1);
                  
       if(add == Worker_bee_Address) // do anything only if the address matches
       {
+        
+        if (num_trans++ >= 2 && num_trans < 4) // blinky blinky
+          digitalWrite(A2,1);
+         else if (num_trans >= 4) 
+          {
+            num_trans = 0;
+            digitalWrite(A2,0);
+          }
+          
         if (spd1>=0 && spd1 <= 55)
         {
           spd1 = sign == 1 ? -spd1 : spd1; // sign = 1 indicates that spd1 is negative
@@ -152,10 +162,14 @@ void loop()
 //          delay(500);
           Serial.print(RIGHT + spd1);
           Serial.print(' ');
-          Serial.println(LEFT  - spd1);
+          Serial.println(LEFT);
           
           R.move(RIGHT + spd1,0);
           L.move(LEFT  - spd1,0);
+//          changes made 
+//          delay(5); 
+//          R.move(RIGHT,0);
+//          L.move(LEFT,0);
           
         }
         // mode instances          
