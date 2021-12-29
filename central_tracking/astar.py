@@ -120,6 +120,3 @@ def astar( start, end):
 
 
 def bot_path(induction_centre , destination ):
-
-    path = astar(grid , start, end)
-    return path

@@ -212,5 +212,3 @@ class ControlSystem:
 
         speed = V * 50 / 1.29
         return np.round(speed)
-
-    # def graphs_for_nerds (self) :
