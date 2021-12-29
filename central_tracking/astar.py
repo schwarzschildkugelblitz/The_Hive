@@ -119,4 +119,7 @@ def astar( start, end):
             open_list.append(child)
 
 
-def bot_path(induction_centre , destination ):
+# def bot_path(induction_centre , destination ):
+
+#     path = astar(grid , start, end)
+#     return path
