@@ -97,10 +97,10 @@ class Camera:
         self.camera = camera
         self.set_time = 0
         self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
-        self.processed1 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
-                                          (width, height + extra_height))
-        self.processed2 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (width, height))
-        self.original = cv2.VideoWriter('original_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (1920, 1080))
+        # self.processed1 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
+        #                                   (width, height + extra_height))
+        # self.processed2 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (width, height))
+        # self.original = cv2.VideoWriter('original_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (1920, 1080))
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
@@ -263,7 +263,7 @@ class Camera:
         the_hive_processed_video_with_grid = the_hive_processed_video.copy()
         cv2.imshow("Top view frame with Markers", the_hive_processed_video)
         # Save videos
-        self.processed1.write(the_hive_processed_video)
-        self.processed2.write(the_hive_processed_video_with_grid)
-        self.original.write(frame)
+        # self.processed1.write(the_hive_processed_video)
+        # self.processed2.write(the_hive_processed_video_with_grid)
+        # self.original.write(frame)
         return markers, labels

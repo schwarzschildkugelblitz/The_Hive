@@ -7,18 +7,18 @@ robots = [7, 8, 9, 10]  # marker labels of robots
 path = [
     np.array([( 8.5/20, 0.5/10), ( 8.5/20, 8.5/10), ( 2.5/20, 8.5/10), ( 8.5/20, 8.5/10), ( 8.5/20, 0.5/10)]),
     np.array([( 0.5/15, 4.5/14), (14.5/15, 4.5/14), (14.5/15, 6.5/14), ( 0.5/15, 6.5/14)]),
-    np.array([(10.5/20, 0.5/10), (10.5/20, 9.5/10), (17.5/20, 9.5/10), (10.5/20, 9.5/10), (10.5/20, 0.5/10)]),
+    np.array([( 0.5/15, 6.5/14), (14.5/15, 6.5/14), (14.5/15, 8.5/14), ( 0.5/15, 8.5/14)]),
     np.array([(11.5/20, 0.5/10), (11.5/20, 8.5/10), (17.5/20, 8.5/10), (11.5/20, 8.5/10), (11.5/20, 0.5/10)])
 ]
 
 # special command for each robot after each step through path
 bot_commands = [['right', 'drop', 'left', 'stop'],
                 ['right', 'right', 'stop'],
-                ['left', 'drop', 'right', 'stop'],
+                ['right', 'right', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 50
+threshold = 75
 
 
 def special_command(address, bot_command):
@@ -106,14 +106,10 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        # self.Kp = 0.0090964
-        # self.Ki = 0.03136405
-        # self.Kd = 0.002
-        # self.N = 4.0
-        self.Kp = 0.0
-        self.Ki = 0.0
-        self.Kd = 0
-        self.N = 0
+        self.Kp = 0.027
+        self.Ki = 0.20
+        self.Kd = 0.0025 # 33
+        self.N = 3.37
         self.last_time = [time()] * 4
 
         # to hold id of current bot and current step that each bot is on
@@ -200,8 +196,8 @@ class ControlSystem:
 
         # speed offset between left and right motors, calculated through PID
         speed = self.pid(self.current_bot)
-        if self.current_bot == 1:
-            print(angle)
+        if self.current_bot == 2:
+            print(speed)
 
         # Arrange and compress data to transmit to robots
         self.data[self.current_bot][0] = 4 * abs(speed) + self.current_bot
@@ -227,20 +223,19 @@ class ControlSystem:
         # self.integrator_state[bot] += self.Ki * theta * delta_t
         # self.filter_state[bot] += delta_t * D
 
-        if bot == 1:
-            print(D, V)
-        V = min(1.29, max(-1.29, V))
-        print(V)
-        if -15 < theta < -5 or 5 < theta < 15:
+        # if bot == 1:
+        #     print(D, V)
+        V = min(1.8, max(-1.8, V))
+        if -40< theta < 40:
             # self.integrator_state[bot] += self.Ki * theta * delta_t
             self.integrator_state[bot] += theta * delta_t
             self.filter_state[bot] += delta_t * D
 
-            self.integrator_state[bot] = min(1.29, max(-1.29, self.integrator_state[bot]))
-            self.filter_state[bot] = min(1.29, max(-1.29, self.filter_state[bot]))
+            self.integrator_state[bot] = min(1.8, max(-1.8, self.integrator_state[bot]))
+            self.filter_state[bot] = min(1.8, max(-1.8, self.filter_state[bot]))
         else:
             self.integrator_state[bot] = 0
             self.filter_state[bot] = 0
 
-        speed = V * 55 / 1.29
+        speed = V * 55 / 1.8
         return np.round(speed)

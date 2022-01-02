@@ -14,12 +14,23 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 1
-#define LEFT 125 // speed of left motor
+#define Worker_bee_Address 2
+#define LEFT 150 // speed of left motor
 #define RIGHT 150 // speed of right motor
-
+#define tau 0.00016
+#define a 0.0017
+#define b 0.00000288
+#define h 0.00102
+#define l 0.00204
 RH_NRF24 nrf24 (A4,A3);
 ServoTimer2 flipper_servo; 
+
+int convert_right(int rightPWM)
+{ // frequeny compensation
+  float x = rightPWM/255.0;
+  int modPWM = round(rightPWM*(x + 490*tau*(2*pow(b,x)-1-b))/((x+ 980*tau*(2*pow(a,x)-1-a))*1.15));
+  return rightPWM;
+}
 
 class motor 
 {
@@ -160,7 +171,7 @@ void loop()
 //          delay(500);
 //          digitalWrite(A0,LOW);
 //          delay(500);
-          Serial.print(RIGHT + spd1);
+          Serial.print(convert_right(RIGHT + spd1));
           Serial.print(' ');
           Serial.println(LEFT);
           

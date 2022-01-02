@@ -52,6 +52,7 @@ def main():
         # print(signal)
         arduino.send(signal)
 
+
         # exit condition, press key 'd'
         if cv2.waitKey(20) & 0xFF == ord('d'):
             break
