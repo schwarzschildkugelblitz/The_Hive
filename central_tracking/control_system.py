@@ -18,7 +18,7 @@ bot_commands = [['right', 'drop', 'left', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 75
+threshold = 70
 
 
 def special_command(address, bot_command):
@@ -55,7 +55,7 @@ def return_angle(a0, a1, b0, b1):
     Output type -> degrees
     """
 
-    mag_a = distance(a0, a1)
+    mag_a = distance(a0, a1) + 0.0001
     va = ((a1[1] - a0[1]) / mag_a, (a1[0] - a0[0]) / mag_a)
 
     mag_b = distance(b0, b1)
@@ -106,10 +106,10 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.027
-        self.Ki = 0.20
-        self.Kd = 0.0025 # 33
-        self.N = 3.37
+        self.Kp = 0.005
+        self.Ki = 0.0009
+        self.Kd = 0.001 # 33
+        self.N = 3.3
         self.last_time = [time()] * 4
 
         # to hold id of current bot and current step that each bot is on
