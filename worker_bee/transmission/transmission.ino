@@ -16,7 +16,7 @@ void setup()
 
   if (!nrf24.init());
 //    Serial.println("init failed");
-  if (!nrf24.setChannel(1));
+  if (!nrf24.setChannel(2));
 //    Serial.println("setChannel failed");
   if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm));
 //    Serial.println("setRF failed");    
