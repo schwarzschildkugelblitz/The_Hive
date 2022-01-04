@@ -2,7 +2,7 @@
 given by central tracking system 
 
 written by Tanmay Vadhera
-and minor changes made by Mudit aggarwal and Harshit Batra 
+and minor changes made by Mudit Aggarwal, Rohan Deswal and Harshit Batra 
 
 dependies  
     - ServoTimer2.h
@@ -16,7 +16,7 @@ dependies
 
 #define Worker_bee_Address 2
 #define LEFT 150 // speed of left motor
-#define RIGHT 150 // speed of right motor
+#define RIGHT 140 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288
@@ -112,7 +112,7 @@ void setup()
     Serial.println("init failed");
     
   // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-  if (!nrf24.setChannel(1))
+  if (!nrf24.setChannel(2))
     Serial.println("setChannel failed");
     
   if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
@@ -134,6 +134,7 @@ void loop()
 //  myservo.write(1130);
   if (nrf24.available())
   {
+    Serial.println("Rohan");
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     len = sizeof(buf);
   
