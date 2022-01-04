@@ -1,5 +1,5 @@
 """
-By Mudit Aggarwal (2021-09-06 01:07:00)
+By Mudit Aggarwal
 Main file for central tracking system, controls the 3 main
 components of the system:
     Camera (Marker detection using Aruco)
@@ -13,7 +13,6 @@ Dependencies:
     control_system
     serial_communication
 """
-import time
 import cv2
 from marker_detection import Camera
 from serialcommunication import SerialCommunication
@@ -36,7 +35,7 @@ control = ControlSystem(width, height)
 
 
 def main():
-    # detects corners and unwarps the image
+    # detect corners and unwarp the image
     camera.detect_corners()
 
     # Main loop of the system, is run until manually terminated
@@ -52,7 +51,6 @@ def main():
         # print(signal)
         arduino.send(signal)
         print(signal)
-
 
         # exit condition, press key 'd'
         if cv2.waitKey(20) & 0xFF == ord('d'):

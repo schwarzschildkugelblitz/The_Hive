@@ -1,6 +1,6 @@
 """
-By Mudit Aggarwal (2021-06-29 01:19:00)
-   Harshit Batra  (2021-06-29 02:55:00)
+By Mudit Aggarwal
+   Harshit Batra
 ArUco marker detection program, 
 This program corrects distorted perspective of a rectangular plane
 with ArUco markers at its corners. 
@@ -45,7 +45,7 @@ def timer_and_fps(set_time, previous_time, req):
 
 def resize(scale_percent, img):
     """
-    Resize OpenCV image to given percent of its original width and height
+    OpenCV image is resized to  given percent of its original width and height
     width and height are resized linearly, area is not taken into account
 
     scale_percent (float): percent by which to change width and height
@@ -97,10 +97,7 @@ class Camera:
         self.camera = camera
         self.set_time = 0
         self.capture = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
-        # self.processed1 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10,
-        #                                   (width, height + extra_height))
-        # self.processed2 = cv2.VideoWriter('processed_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (width, height))
-        # self.original = cv2.VideoWriter('original_video.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (1920, 1080))
+
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
@@ -260,7 +257,7 @@ class Camera:
         the_hive_processed_video = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
         # adding text to video
         self.processed_video_text(the_hive_processed_video, previous_time)
-        the_hive_processed_video_with_grid = the_hive_processed_video.copy()
+        # the_hive_processed_video_with_grid = the_hive_processed_video.copy()
         cv2.imshow("Top view frame with Markers", the_hive_processed_video)
         # Save videos
         # self.processed1.write(the_hive_processed_video)

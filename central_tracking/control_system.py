@@ -49,7 +49,7 @@ def distance(p1, p2):
 
 def return_angle(a0, a1, b0, b1):
     """
-    Returns angle between 2 lines formed by the the points
+    Returns angle between 2 lines formed by the points
     a0 with a1 and b0 with b1
     A unit vector is created and angle is calculated using dot product
     Output type -> degrees
@@ -108,7 +108,7 @@ class ControlSystem:
         self.integrator_state = np.zeros(4, dtype=np.float32)
         self.Kp = 0.005
         self.Ki = 0.0009
-        self.Kd = 0.001 # 33
+        self.Kd = 0.001
         self.N = 3.3
         self.last_time = [time()] * 4
 
@@ -121,7 +121,7 @@ class ControlSystem:
 
     def command(self, markers, labels):
         """
-        Generates and returns commands for the robots
+        Generates and returns commands for the robots.
         Robots need to reach the next target in their respective paths
         to account for any deviation, a correction system (based on PID)
         is used which constantly corrects for the angle of robot with the current path
@@ -132,7 +132,7 @@ class ControlSystem:
 
         returns:
             a byte string of uint8 numbers denoting the offset speed and sign of direction of robot
-            eg. "32 -1\n"
+            e.g. "32 -1\n"
             here 32 is the speed offset for left and right motors of robot which helps
             it to turn and correct its angle
 
@@ -226,7 +226,7 @@ class ControlSystem:
         # if bot == 1:
         #     print(D, V)
         V = min(1.8, max(-1.8, V))
-        if -40< theta < 40:
+        if -40 < theta < 40:
             # self.integrator_state[bot] += self.Ki * theta * delta_t
             self.integrator_state[bot] += theta * delta_t
             self.filter_state[bot] += delta_t * D
