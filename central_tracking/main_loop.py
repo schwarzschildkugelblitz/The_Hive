@@ -31,7 +31,7 @@ extra_height = 10
 
 # initializing the 3 main components of tracking system
 camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
-arduino = SerialCommunication("COM4", 115200)
+arduino = SerialCommunication("COM11", 115200)
 control = ControlSystem(width, height)
 
 
@@ -51,6 +51,7 @@ def main():
         # Placeholder
         # print(signal)
         arduino.send(signal)
+        print(signal)
 
 
         # exit condition, press key 'd'
