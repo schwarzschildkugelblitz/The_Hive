@@ -255,9 +255,7 @@ class Camera:
         markers, labels = aruco.detectMarkers(unwarped_frame, self.dictionary)[0:2]
 
         the_hive_processed_video = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
-        # adding text to video
-        self.processed_video_text(the_hive_processed_video, previous_time)
-        # the_hive_processed_video_with_grid = the_hive_processed_video.copy()
+
         cv2.imshow("Top view frame with Markers", the_hive_processed_video)
         # Save videos
         # self.processed1.write(the_hive_processed_video)
