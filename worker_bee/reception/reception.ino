@@ -134,7 +134,7 @@ void loop()
 //  myservo.write(1130);
   if (nrf24.available())
   {
-    Serial.println("Rohan");
+    //Serial.println("Rohan");
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     len = sizeof(buf);
   

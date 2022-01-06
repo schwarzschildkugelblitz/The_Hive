@@ -1,19 +1,19 @@
+import cv2
 import numpy as np
 from time import time
 from queue import Full
 
 from bot import Bot
+from fetch_job import job_generator
 
 robots = [7, 8, 9, 10]  # marker labels of robots
 
 # Path for each robot to follow
 path = [
-    np.array(
-        [(8.5 / 20, 0.5 / 10), (8.5 / 20, 8.5 / 10), (2.5 / 20, 8.5 / 10), (8.5 / 20, 8.5 / 10), (8.5 / 20, 0.5 / 10)]),
-    np.array([(0.5 / 15, 4.5 / 14), (14.5 / 15, 4.5 / 14), (14.5 / 15, 6.5 / 14), (0.5 / 15, 6.5 / 14)]),
-    np.array([(0.5 / 15, 6.5 / 14), (14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
-    np.array([(11.5 / 20, 0.5 / 10), (11.5 / 20, 8.5 / 10), (17.5 / 20, 8.5 / 10), (11.5 / 20, 8.5 / 10),
-              (11.5 / 20, 0.5 / 10)])
+    np.array([(8.5 / 20, 8.5 / 10), (2.5 / 20, 8.5 / 10), (8.5 / 20, 8.5 / 10), (8.5 / 20, 0.5 / 10)]),
+    np.array([(14.5 / 15, 4.5 / 14), (14.5 / 15, 6.5 / 14), (0.5 / 15, 6.5 / 14)]),
+    np.array([(14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
+    np.array([(11.5 / 20, 8.5 / 10), (17.5 / 20, 8.5 / 10), (11.5 / 20, 8.5 / 10), (11.5 / 20, 0.5 / 10)])
 ]
 
 # special command for each robot after each step through path
@@ -54,6 +54,8 @@ class ControlSystem:
 
         self.bots = [Bot(i, robots[i]) for i in range(4)]
 
+        self.job = job_generator()
+
         for i, robo_path in enumerate(path):
             for target_point in robo_path:
                 target_point[0] *= self.width
@@ -65,7 +67,7 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.02
+        self.Kp = 0.01
         self.Ki = 0.0009
         self.Kd = 0.0007
         self.N = 3.3
@@ -96,7 +98,12 @@ class ControlSystem:
         for bot in self.bots:
             # iterate over all robots and store their coordinates
             if detected_labels is not None and bot.marker_id in detected_labels:
-                bot.marker = detected_markers[list(detected_labels).index(bot.marker_id)]
+                bot.marker = detected_markers[list(detected_labels).index(bot.marker_id)][0]
+
+            if bot.idle:
+                job = next(self.job)
+                bot.payload = job[0]
+                # TODO both.path = astar_something(bot.coords, *job[1:])
 
         for bot in self.bots:
             bot.set_center()
@@ -111,7 +118,7 @@ class ControlSystem:
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
-                        speed = special_command('stop')
+                        # TODO call pathfinding and get new path with high_priority robot as obstacle
                         speed = special_command('stop')
 
             speed_data = int(4 * abs(speed) + bot.id)
@@ -119,9 +126,13 @@ class ControlSystem:
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
+            if bot.id == 2:
+                print(bot.marker_id, speed, bot.path[bot.step])
+
             try:
                 queue.put(signal)
             except Full:
+                print("Hello 1")
                 continue
 
     # noinspection PyPep8Naming
@@ -151,3 +162,9 @@ class ControlSystem:
 
         speed = V * 55 / 1.8
         return np.round(speed)
+
+    def draw_packages(self, video_feed):
+        for bot in self.bots:
+            if any(bot.coords != np.zeros(2)):
+                cv2.putText(video_feed, bot.payload, bot.coords, cv2.FONT_HERSHEY_SIMPLEX, 1,
+                            (0, 255, 255), 2, cv2.LINE_4)

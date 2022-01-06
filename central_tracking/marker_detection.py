@@ -256,9 +256,8 @@ class Camera:
 
         the_hive_processed_video = aruco.drawDetectedMarkers(unwarped_frame.copy(), markers)
 
-        cv2.imshow("Top view frame with Markers", the_hive_processed_video)
         # Save videos
         # self.processed1.write(the_hive_processed_video)
         # self.processed2.write(the_hive_processed_video_with_grid)
         # self.original.write(frame)
-        return markers, labels
+        return markers, labels, the_hive_processed_video
