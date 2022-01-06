@@ -36,6 +36,7 @@ class Bot:
         self.step += 1
 
         if self.step == len(self.path):
+            self.step = 0
             self.idle = True
 
         return command

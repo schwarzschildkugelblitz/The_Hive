@@ -6,7 +6,7 @@ from queue import Full
 from bot import Bot
 from fetch_job import job_generator
 
-robots = [7, 8, 9, 10]  # marker labels of robots
+robots = [4, 5, 6, 7]  # marker labels of robots
 
 # Path for each robot to follow
 path = [
@@ -23,7 +23,7 @@ bot_commands = [['right', 'drop', 'left', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 70
+threshold = 75
 
 
 def special_command(bot_command):
@@ -68,8 +68,8 @@ class ControlSystem:
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
         self.Kp = 0.01
-        self.Ki = 0.0009
-        self.Kd = 0.0007
+        self.Ki = 0.0008
+        self.Kd = 0.0002
         self.N = 3.3
 
         self.priority = [0, 1, 2, 3]
@@ -104,6 +104,7 @@ class ControlSystem:
                 job = next(self.job)
                 bot.payload = job[0]
                 # TODO both.path = astar_something(bot.coords, *job[1:])
+                bot.idle = False
 
         for bot in self.bots:
             bot.set_center()
@@ -128,8 +129,10 @@ class ControlSystem:
 
             if bot.id == 2:
                 print(bot.marker_id, speed, bot.path[bot.step])
+                # print(bot.marker_id, speed, bot.path[bot.step])
 
             try:
+
                 queue.put(signal)
             except Full:
                 print("Hello 1")
@@ -166,5 +169,5 @@ class ControlSystem:
     def draw_packages(self, video_feed):
         for bot in self.bots:
             if any(bot.coords != np.zeros(2)):
-                cv2.putText(video_feed, bot.payload, bot.coords, cv2.FONT_HERSHEY_SIMPLEX, 1,
-                            (0, 255, 255), 2, cv2.LINE_4)
+                cv2.putText(video_feed, bot.payload, bot.coords.astype(np.int32), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8,
+                            (0, 0, 0), 1, cv2.LINE_8)

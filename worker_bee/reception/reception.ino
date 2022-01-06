@@ -4,6 +4,7 @@ given by central tracking system
 written by Tanmay Vadhera
 and minor changes made by Mudit Aggarwal, Rohan Deswal and Harshit Batra 
 
+
 dependies  
     - ServoTimer2.h
     - SPI.h
@@ -15,7 +16,7 @@ dependies
 #include <RH_NRF24.h> //NRF library 
 
 #define Worker_bee_Address 2
-#define LEFT 150 // speed of left motor
+#define LEFT 140 // speed of left motor
 #define RIGHT 140 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
@@ -25,12 +26,6 @@ dependies
 RH_NRF24 nrf24 (A4,A3);
 ServoTimer2 flipper_servo; 
 
-int convert_right(int rightPWM)
-{ // frequeny compensation
-  float x = rightPWM/255.0;
-  int modPWM = round(rightPWM*(x + 490*tau*(2*pow(b,x)-1-b))/((x+ 980*tau*(2*pow(a,x)-1-a))*1.15));
-  return rightPWM;
-}
 
 class motor 
 {
@@ -101,6 +96,7 @@ void unpack (uint8_t pack[])
 void setup() 
 {
   pinMode(A0,OUTPUT);
+  pinMode(A2,OUTPUT);
   flipper_servo.attach(3);
   flipper_servo.write(1120);
   delay(1000);
@@ -147,7 +143,7 @@ void loop()
 //      Serial.print(buf[1]);
         
       unpack(buf);
-
+//
       Serial.print(" -> ");
       Serial.print(add);
       Serial.print(" ");
@@ -156,9 +152,9 @@ void loop()
       if(add == Worker_bee_Address) // do anything only if the address matches
       {
         
-        if (num_trans++ >= 2 && num_trans < 4) // blinky blinky
+        if (num_trans++ >= 5 && num_trans < 10) // blinky blinky
           digitalWrite(A2,1);
-         else if (num_trans >= 4) 
+         else if (num_trans >= 10) 
           {
             num_trans = 0;
             digitalWrite(A2,0);
@@ -172,9 +168,6 @@ void loop()
 //          delay(500);
 //          digitalWrite(A0,LOW);
 //          delay(500);
-          Serial.print(convert_right(RIGHT + spd1));
-          Serial.print(' ');
-          Serial.println(LEFT);
           
           R.move(RIGHT + spd1,0);
           L.move(LEFT  - spd1,0);

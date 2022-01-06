@@ -63,6 +63,7 @@ def main(process_queue):
         markers, labels, video_feed = camera.detect_markers()
 
         control.command(markers, labels, process_queue)
+        control.draw_packages(video_feed)
 
         cv2.imshow("Arena", video_feed)
 
