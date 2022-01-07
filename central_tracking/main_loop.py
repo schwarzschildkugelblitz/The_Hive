@@ -33,12 +33,14 @@ width, height = 750, 700
 extra_height = 10
 
 # initializing the 3 main components of tracking system
-camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
-arduino = SerialCommunication("COM4", 115200)
+camera = Camera(width=width, height=height, camera=0, extra_height=extra_height)
 control = ControlSystem(width, height)
 
 
 def send_signal(process_queue):
+
+    arduino = SerialCommunication("COM11", 115200)
+
     while True:
         try:
             signal = process_queue.get()
