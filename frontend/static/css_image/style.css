@@ -223,17 +223,17 @@ main{
     text-align: center;
     justify-content: space-around;
     padding: 10px;
-    background-color: rgb(255, 145, 209) ;
+    background-color: rgb(9, 191, 247) ;
     border-radius: 10px;
 }
 .Info_value{
-    background-color: rgb(255, 145, 209) ;
+    background-color: rgb(9, 191, 247) ;
 }
 .slide-container{
-    background-color: rgb(255, 145, 209) ; 
+    background-color: rgb(9, 191, 247) ; 
 }
 .PID_label{
-    background-color: rgb(255, 145, 209) ;
+    background-color: rgb(9, 191, 247) ;
     color : white ; 
     font-size: 20px;
     margin-bottom: 10px;

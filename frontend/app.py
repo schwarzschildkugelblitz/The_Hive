@@ -1,3 +1,8 @@
+# todo 
+#  change text font 
+# change colour scheme 
+# graphs 
+
 from flask import Flask ,render_template, Response
 import cv2
 
