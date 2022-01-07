@@ -1,6 +1,6 @@
 /* RECEPTION CODE handles reception , decoding and execution of various commands
 given by central tracking system 
-+
+
 written by Tanmay Vadhera
 and minor changes made by Mudit Aggarwal, Rohan Deswal and Harshit Batra 
 
@@ -15,9 +15,9 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 2
-#define LEFT 140 // speed of left motor
-#define RIGHT 140 // speed of right motor
+#define Worker_bee_Address 0
+#define LEFT 85//149 // speed of left motor
+#define RIGHT 100//140 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288
@@ -188,7 +188,7 @@ void loop()
             delay(100);
             L.move(0,150);
             R.move(150,0);
-            delay(340);
+            delay(315);
             L.move(150,0);
             R.move(0,150);
             delay(20);
@@ -207,7 +207,7 @@ void loop()
             delay(100);
             L.move(150,0);
             R.move(0,150);
-            delay(310);
+            delay(315);
             L.move(0,150);
             R.move(150,0);
             delay(20);

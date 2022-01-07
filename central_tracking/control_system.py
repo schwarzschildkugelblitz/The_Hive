@@ -5,25 +5,26 @@ from queue import Full
 
 from bot import Bot
 from fetch_job import job_generator
+from astar import PathFinder
 
 robots = [4, 5, 6, 7]  # marker labels of robots
 
 # Path for each robot to follow
 path = [
-    np.array([(8.5 / 20, 8.5 / 10), (2.5 / 20, 8.5 / 10), (8.5 / 20, 8.5 / 10), (8.5 / 20, 0.5 / 10)]),
     np.array([(14.5 / 15, 4.5 / 14), (14.5 / 15, 6.5 / 14), (0.5 / 15, 6.5 / 14)]),
+    np.array([(14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
     np.array([(14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
     np.array([(11.5 / 20, 8.5 / 10), (17.5 / 20, 8.5 / 10), (11.5 / 20, 8.5 / 10), (11.5 / 20, 0.5 / 10)])
 ]
 
 # special command for each robot after each step through path
-bot_commands = [['right', 'drop', 'left', 'stop'],
+bot_commands = [['right', 'right', 'stop'],
                 ['right', 'right', 'stop'],
                 ['right', 'right', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 75
+threshold = 35
 
 
 def special_command(bot_command):
@@ -55,6 +56,7 @@ class ControlSystem:
         self.bots = [Bot(i, robots[i]) for i in range(4)]
 
         self.job = job_generator()
+        self.path_finder = PathFinder(self.width, self.height)
 
         for i, robo_path in enumerate(path):
             for target_point in robo_path:
@@ -67,11 +69,10 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.01
-        self.Ki = 0.0008
-        self.Kd = 0.0002
-        self.N = 3.3
-
+        self.Kp = 0.015
+        self.Ki = 0.0009
+        self.Kd = 0.0
+        self.N = 3
         self.priority = [0, 1, 2, 3]
 
     def command(self, detected_markers, detected_labels, queue):
@@ -95,26 +96,42 @@ class ControlSystem:
             1 means the robot needs to turn anti-clockwise for correction
         """
 
-        for bot in self.bots:
+        for bot in self.bots[0:1]:
+
             # iterate over all robots and store their coordinates
             if detected_labels is not None and bot.marker_id in detected_labels:
                 bot.marker = detected_markers[list(detected_labels).index(bot.marker_id)][0]
 
+            bot.set_center()
+
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                # TODO both.path = astar_something(bot.coords, *job[1:])
+                if bot.id == 0:
+                    bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords)
+                    bot.path = bot.path[1:-1]
+                    # print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
+            print(bot.path[bot.step])
+            # if bot.id == 0:
+            #     print(bot.path, bot.step, bot.step)
+                # print(bot.commands)
 
-        for bot in self.bots:
-            bot.set_center()
             bot.set_angle()
 
+        for bot in self.bots[0:1]:
+
             if bot.target_dist() < threshold:
+                bot.old_target = bot.path[bot.step]
                 speed = special_command(bot.get_command())
                 self.integrator_state[bot.id] = 0.0
+                self.filter_state[bot.id] = 0.0
             else:
                 speed = self.pid(bot)
+
+            if bot.old_target_dist() < threshold:
+                self.integrator_state[bot.id] = 0.0
+                self.filter_state[bot.id] = 0.0
 
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
@@ -127,15 +144,20 @@ class ControlSystem:
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
-            if bot.id == 2:
-                print(bot.marker_id, speed, bot.path[bot.step])
+            # if bot.id == 2:
+            #     print(bot.marker_id, speed, bot.path[bot.step])
                 # print(bot.marker_id, speed, bot.path[bot.step])
 
             try:
-
+                print(f'From main thread: {signal}')
+                if speed > 55:
+                    queue.put(signal)
+                    queue.put(signal)
+                    queue.put(signal)
+                    queue.put(signal)
                 queue.put(signal)
             except Full:
-                print("Hello 1")
+                print("Queue is full")
                 continue
 
     # noinspection PyPep8Naming
@@ -163,7 +185,7 @@ class ControlSystem:
             self.integrator_state[bot.id] = 0
             self.filter_state[bot.id] = 0
 
-        speed = V * 55 / 1.8
+        speed = V * 45 / 1.8
         return np.round(speed)
 
     def draw_packages(self, video_feed):

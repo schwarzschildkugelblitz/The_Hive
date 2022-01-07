@@ -2,7 +2,7 @@
 
 as part of hive round 2 """
 import pygame
-
+from math import atan2
 locations = {
     'Mumbai': 1,
     'Delhi': 2,
@@ -97,7 +97,7 @@ class PathFinder:
         self.calculate_path = False
         self.calculate_button_coord = (3 * self.scale, self.rows * self.scale)
         self.reset_button_coord = (11 * self.scale, self.rows * self.scale)
-        self.path = []
+        # self.path = []
         self.new_blocks = []
 
     def draw_path(self):
@@ -138,9 +138,9 @@ class PathFinder:
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
 
-                            print('\nNodes:', self.points_to_visit)
-                            self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1])
-                            print('Path:', self.path)
+                            # print('\nNodes:', self.points_to_visit)
+                            self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1],None)
+                            # print('Path:', self.path)
 
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
                                 self.reset_button_coord[1] <= y <= self.reset_button_coord[1] + self.scale:
@@ -150,8 +150,8 @@ class PathFinder:
                             self.points_to_visit = []
                             self.path = []
 
-                            print("Nodes after Reset:", self.points_to_visit)
-                            print("Path after Reset:", self.path)
+                            # print("Nodes after Reset:", self.points_to_visit)
+                            # print("Path after Reset:", self.path)
 
             game_display.fill((255, 255, 255))
             for i in range(self.rows):
@@ -213,17 +213,18 @@ class PathFinder:
         all_turns = []
         bot_coords = [location[1] // self.scale, location[0] // self.scale]
         start = locations_coords[induction]
-        min_turns = 10000000000000000000000000000000000000
+        min_turns = float('inf')
         min_ind = 0
-        
+        # print(bot_coords, locations_coords[induction])
         # If bot is at an induction point
         if bot_coords[0] == start[0] and bot_coords[1] == start[1]:
             for i in range(1,5):
                 end = locations_coords[target + str(i)]
-                path = astar(start, end, arena)
-
-                path = get_turns_only(path)
-                turns = get_turns(path)
+                # print('Start:',start,'End:',end)
+                path = astar(arena, start, end,locations[target])
+                # print(path, start, end)
+                path = self.get_turns_only(path)
+                turns = self.get_turns(path)
                 curr_min = len(turns)
                 paths.append(path)
                 all_turns.append(turns)
@@ -231,17 +232,18 @@ class PathFinder:
                 if curr_min < min_turns:
                     min_turns = curr_min
                     min_ind = i
-            return convert_to_space(paths[min_ind-1][0:]),all_turns[min_ind-1]
+                path = []
+            return self.convert_to_space(paths[min_ind - 1][0:]), all_turns[min_ind - 1]
 
         # Path from bot to induction
-        path_1 = get_turns_only(astar(bot_coords, locations_coords[induction], arena))
-        turns_1 = get_turns(path)
+        path_1 = self.get_turns_only(astar(bot_coords, locations_coords[induction], arena,locations[target]))
+        turns_1 = self.get_turns(path_1)
 
         # Path from induction to location
-        path_2 = get_path(induction,target,indcution)
-        turns_2 = get_turns(path_2)
+        path_2 = self.get_path(induction,target,induction)
+        turns_2 = self.get_turns(path_2)
 
-        return convert_to_space(path_1[0:] + path_2[0:]),turns_1 + ['right','right'] + turns_2
+        return self.convert_to_space(path_1[0:] + path_2[0:]), turns_1 + ['right', 'right'] + turns_2
     
     def get_turns_only(self,path):
         # print('Full Path:',path)
@@ -309,7 +311,7 @@ class Node:
         return self.position[0] == other.position[0] and self.position[1] == other.position[1]
 
 
-def astar(_grid, start, end):
+def astar(_grid, start, end, extra):
     """Returns path """
 
     # given grid
@@ -369,7 +371,8 @@ def astar(_grid, start, end):
                 continue
 
             # Make sure walkable terrain
-            if grid[node_position[0]][node_position[1]] != 0 and grid[node_position[0]][node_position[1]] != -2:
+            if grid[node_position[0]][node_position[1]] != 0 and grid[node_position[0]][node_position[1]] != -2 and \
+                    grid[node_position[0]][node_position[1]] != extra:
                 continue
 
             # Create new node
@@ -413,4 +416,3 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 
 if __name__ == '__main__':
     P = PathFinder(750, 700)
-    P.get_path()

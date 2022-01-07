@@ -25,6 +25,8 @@ class Bot:
         self.step = 0
         self.angle = 0
 
+        self.old_target = np.zeros(2)
+
         self.last_time = time.time()
 
     def check_collision(self, other_bot):
@@ -86,5 +88,15 @@ class Bot:
 
         try:
             return distance(self.coords, self.path[self.step])
+        except IndexError:
+            return float('NaN')
+
+    def old_target_dist(self):
+        """
+        Returns distance to next target point
+        """
+
+        try:
+            return distance(self.coords, self.old_target)
         except IndexError:
             return float('NaN')

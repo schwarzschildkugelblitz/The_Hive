@@ -29,25 +29,17 @@ resolution of camera and absolute width and height of arena
 """
 # width, height = int(44*800/34.5), int(24*800/34.5)
 # width, height = 600, 300
-width, height = 750, 700 #1050, 980
+width, height = 750, 700
 extra_height = 10
 
 # initializing the 3 main components of tracking system
-<<<<<<< HEAD
-camera = Camera(width=width, height=height, camera=0, extra_height=extra_height)
-=======
 camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
->>>>>>> f00cbf63e644eaf16a5f0fa5ed555a214ee979e4
 control = ControlSystem(width, height)
 
 
 def send_signal(process_queue):
-<<<<<<< HEAD
 
-    arduino = SerialCommunication("COM11", 115200)
-=======
     arduino = SerialCommunication("COM4", 115200)
->>>>>>> f00cbf63e644eaf16a5f0fa5ed555a214ee979e4
 
     while True:
         try:
@@ -56,7 +48,7 @@ def send_signal(process_queue):
             continue
 
         arduino.send(signal)
-        # print(signal)
+        print(signal)
         time.sleep(0.02)
 
 
@@ -77,7 +69,7 @@ def main(process_queue):
         cv2.imshow("Arena", video_feed)
 
         # exit condition, press key 'd'
-        if cv2.waitKey(20) & 0xFF == ord('d'):
+        if cv2.waitKey(100) & 0xFF == ord('d'):
             break
 
     camera.capture.release()
