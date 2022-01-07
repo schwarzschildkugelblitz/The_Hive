@@ -4,6 +4,7 @@ import numpy as np
 
 collision_threshold = 70
 
+
 def distance(p1, p2):
     """Returns distance between 2 points"""
 
@@ -16,6 +17,8 @@ class Bot:
         self.marker_id = marker_id
         self.marker = np.zeros((4, 2), dtype=np.float32)
         self.coords = np.zeros(2, dtype=np.float32)
+        self.idle = True
+        self.payload = ""
 
         self.path = []
         self.commands = []
@@ -32,9 +35,9 @@ class Bot:
         command = self.commands[self.step]
         self.step += 1
 
-        if self.step == len(self.command):
-            # TODO get new path
-            pass
+        if self.step == len(self.path):
+            self.step = 0
+            self.idle = True
 
         return command
 
