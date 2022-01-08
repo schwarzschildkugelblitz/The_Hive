@@ -3,6 +3,7 @@
 as part of hive round 2 """
 import pygame
 from math import atan2
+import random
 locations = {
     'Mumbai': 1,
     'Delhi': 2,
@@ -97,7 +98,7 @@ class PathFinder:
         self.calculate_path = False
         self.calculate_button_coord = (3 * self.scale, self.rows * self.scale)
         self.reset_button_coord = (11 * self.scale, self.rows * self.scale)
-        # self.path = []
+        self.path = []
         self.new_blocks = []
 
     def draw_path(self):
@@ -390,10 +391,31 @@ def astar(_grid, start, end, extra):
                     continue
 
             # Create the f, g, and h values
-            child.g = current_node.g + 1
-            child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+            first = current_node.parent
+            curr  = current_node
+            last  = child
+            if first is not None :
+                if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (curr.position[1] == last.position[1] and curr.position[0] != last.position[0])) :
+                    child.g += current_node.g + random.randrange(7,10,1)
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
+                    child.f += child.g + child.h
+                
+                elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
+                    child.g += current_node.g + random.randrange(7,10,1)
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
+                    child.f += child.g + child.h
+                else :  
+                    child.g += current_node.g + 1
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
+                    child.f += child.g + child.h  
+            else : 
+                child.g += current_node.g + 1
+                child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
                     (child.position[1] - end_node.position[1]) ** 2)
-            child.f = child.g + child.h
+                child.f += child.g + child.h
 
             # Child is already in the open list
             for open_node in open_list:
@@ -416,3 +438,4 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 
 if __name__ == '__main__':
     P = PathFinder(750, 700)
+    P.draw_path()
