@@ -457,7 +457,7 @@ def astar(_grid, start, end, extra):
 
         # finding children
         children = []
-        for new_position in [[1, 0],[0, -1], [-1, 0],[0, 1]]:  # Adjacent squares
+        for new_position in [[0, -1], [0, 1], [1, 0], [-1, 0]]:  # Adjacent squares
 
             # Get node position
             node_position = [current_node.position[0] + new_position[0], current_node.position[1] + new_position[1]]
@@ -490,31 +490,25 @@ def astar(_grid, start, end, extra):
             first = current_node.parent
             curr  = current_node
             last  = child
-            
             if first is not None :
-                # check to minimize turning by changing heuritic measurement
                 if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (curr.position[1] == last.position[1] and curr.position[0] != last.position[0])) :
-                    #check for right turn 
-                    child.g = current_node.g+4
-                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
-                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005))) 
+                    child.g += current_node.g + random.randrange(7,10,1)
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
                     child.f += child.g + child.h
                 
                 elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
-                    #check for right turn 
-                    child.g = current_node.g+4
-                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
-                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005)))
+                    child.g += current_node.g + random.randrange(7,10,1)
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
                     child.f += child.g + child.h
                 else :  
-                    #no turn condition 
-                    child.g = current_node.g + 3
-                    child.h = (pow((child.position[0] - end_node.position[0]) ,2)) + (
-                                pow((child.position[1] - end_node.position[1]) , 2))
+                    child.g += current_node.g + 1
+                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
+                                (child.position[1] - end_node.position[1]) ** 2)
                     child.f += child.g + child.h  
             else : 
-                #first node case 
-                child.g = current_node.g + 1
+                child.g += current_node.g + 1
                 child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
                     (child.position[1] - end_node.position[1]) ** 2)
                 child.f += child.g + child.h
