@@ -1,13 +1,9 @@
 """ this code was written by Harshit Batra and Rohan Deswal 
-    as part of hive round 2 
-    dependencies 
-        1 . pygame - pip install pygame
- """
+
+as part of hive round 2 """
 import pygame
-from math import atan2
+from math import atan2, pi
 import random
-from math import pow
-# assigin codes to dropchute 
 locations = {
     'Mumbai': 1,
     'Delhi': 2,
@@ -19,46 +15,83 @@ locations = {
     'Ahmedabad': 8,
     'Jaipur': 9
 }
-#defining position of dropchute in grid 
+
 locations_coords = {
     '1': (4, 0),
     '2': (9, 0),
-    'Mumbai1': (2, 3),
-    'Mumbai2': (2, 4),
-    'Mumbai3': (3, 3),
-    'Mumbai4': (3, 4),
-    'Delhi1': (2, 7),
-    'Delhi2': (2, 8),
-    'Delhi3': (3, 7),
-    'Delhi4': (3, 8),
-    'Kolkata1': (2, 11),
-    'Kolkata2': (2, 12),
-    'Kolkata3': (3, 11),
-    'Kolkata4': (3, 12),
-    'Chennai1': (6, 3),
-    'Chennai2': (6, 4),
-    'Chennai3': (7, 3),
-    'Chennai4': (7, 4),
-    'Bengaluru1': (6, 7),
-    'Bengaluru2': (6, 8),
-    'Bengaluru3': (7, 7),
-    'Bengaluru4': (7, 8),
-    'Hyderabad1': (6, 11),
-    'Hyderabad2': (6, 12),
-    'Hyderabad3': (7, 11),
-    'Hyderabad4': (7, 12),
-    'Pune1': (10, 3),
-    'Pune2': (10, 4),
-    'Pune3': (11, 3),
-    'Pune4': (11, 4),
-    'Ahmedabad1': (10, 7),
-    'Ahmedabad2': (10, 8),
-    'Ahmedabad3': (11, 7),
-    'Ahmedabad4': (11, 8),
-    'Jaipur1': (10, 11),
-    'Jaipur2': (10, 12),
-    'Jaipur3': (11, 11),
-    'Jaipur4': (11, 12)
+
+    'Mumbai1':( 1 , 3 ),
+    'Mumbai2':( 1 , 4 ),
+    'Mumbai3':( 2 , 2 ),
+    'Mumbai4':( 3 , 2 ),
+    'Mumbai5':( 4 , 3 ),
+    'Mumbai6':( 4 , 4 ),
+    'Mumbai7':( 2 , 5 ),
+    'Mumbai8':( 3 , 5 ),
+    'Delhi1':( 1 , 7 ),
+    'Delhi2':( 1 , 8 ),
+    'Delhi3':( 2 , 9 ),
+    'Delhi4':( 3 , 9 ),
+    'Delhi5':( 4 , 8 ),
+    'Delhi6':( 4 , 7 ),
+    'Delhi7':( 3 , 6 ),
+    'Delhi8':( 2 , 6 ),
+    'Kolkata1':( 1 , 11 ),
+    'Kolkata2':( 1 , 12 ),
+    'Kolkata3':( 2 , 13 ),
+    'Kolkata4':( 3 , 13 ),
+    'Kolkata5':( 4 , 12 ),
+    'Kolkata6':( 4 , 11 ),
+    'Kolkata7':( 3 , 10 ),
+    'Kolkata8':( 2 , 10 ),
+    'Chennai1':( 5 , 3 ),
+    'Chennai2':( 5 , 4 ),
+    'Chennai3':( 6 , 5 ),
+    'Chennai4':( 7 , 5 ),
+    'Chennai5':( 8 , 4 ),
+    'Chennai6':( 8 , 3 ),
+    'Chennai7':( 7 , 2 ),
+    'Chennai8':( 6 , 2 ),
+    'Bengaluru1':( 5 , 7 ),
+    'Bengaluru2':( 5 , 8 ),
+    'Bengaluru3':( 6 , 9 ),
+    'Bengaluru4':( 8 , 8 ),
+    'Bengaluru5':( 8 , 8 ),
+    'Bengaluru6':( 8 , 7 ),
+    'Bengaluru7':( 8 , 6 ),
+    'Bengaluru8':( 7 , 6 ),
+    'Hyderabad1':( 6 , 6 ),
+    'Hyderabad2':( 5 , 11 ),
+    'Hyderabad3':( 5 , 12 ),
+    'Hyderabad4':( 6 , 13 ),
+    'Hyderabad5':( 7 , 13 ),
+    'Hyderabad6':( 8 , 11 ),
+    'Hyderabad7':( 7 , 10 ),
+    'Hyderabad8':( 6 , 10 ),
+    'Pune1':( 9 , 3 ),
+    'Pune2':( 9 , 4 ),
+    'Pune3':( 10 , 5 ),
+    'Pune4':( 11 , 5 ),
+    'Pune5':( 12 , 4 ),
+    'Pune6':( 12 , 3 ),
+    'Pune7':( 11 , 2 ),
+    'Pune8':( 10 , 2 ),
+    'Ahmedabad1':( 9 , 7 ),
+    'Ahmedabad2':( 9 , 8 ),
+    'Ahmedabad3':( 10 , 9 ),
+    'Ahmedabad4':( 11 , 9 ),
+    'Ahmedabad5':( 12 , 8 ),
+    'Ahmedabad6':( 12 , 7 ),
+    'Ahmedabad7':( 11 , 6 ),
+    'Ahmedabad8':( 10 , 6 ),
+    'Jaipur1':( 9 , 11 ),
+    'Jaipur2':( 9 , 12 ),
+    'Jaipur3':( 10 , 13 ),
+    'Jaipur4':( 11 , 13 ),
+    'Jaipur5':( 12 , 12 ),
+    'Jaipur6':( 12 , 11 ),
+    'Jaipur7':( 11 , 10 ),
+    'Jaipur8': ( 10 , 10 )
 }
 
 colors = {
@@ -139,6 +172,7 @@ class PathFinder:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:  # Find Path Button or Reset
                         x, y = pygame.mouse.get_pos()
+                        print('(',y//self.scale,',',x//self.scale,')')
                         if self.calculate_button_coord[0] <= x <= self.calculate_button_coord[0] + self.scale and \
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
@@ -167,21 +201,12 @@ class PathFinder:
                     pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(j * self.scale, i * self.scale,
                                                                           self.scale, self.scale), 2)
             # Draw Path
-            for cell in self.path[1:-1]:
-                pygame.draw.rect(game_display, (3, 252, 248), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+            for cell in self.path:
+                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
-                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale),2)
-            for cell in self.points_to_visit[0:1]:
-                pygame.draw.rect(game_display, (0,255,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+            for cell in self.points_to_visit:
+                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
-                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale),2)
-            for cell in self.points_to_visit[1:]:
-                pygame.draw.rect(game_display, (163, 0, 68), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale))
-                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale),2)
 
             # Calculate Path Button
             x, y = pygame.mouse.get_pos()
@@ -223,42 +248,100 @@ class PathFinder:
         quit()
 
     def get_path(self, induction, target, location):
+
         paths = []
         all_turns = []
         bot_coords = [location[1] // self.scale, location[0] // self.scale]
         start = locations_coords[induction]
         min_turns = float('inf')
         min_ind = 0
-        # print(bot_coords, locations_coords[induction])
-        # If bot is at an induction point
-        if bot_coords[0] == start[0] and bot_coords[1] == start[1]:
-            for i in range(1,5):
-                end = locations_coords[target + str(i)]
-                # print('Start:',start,'End:',end)
-                path = astar(arena, start, end,locations[target])
-                # print(path, start, end)
-                path = self.get_turns_only(path)
-                turns = self.get_turns(path)
-                curr_min = len(turns)
-                paths.append(path)
-                all_turns.append(turns)
+        for i in range(1,9):
+            end = locations_coords[target + str(i)]
+            path = astar(arena, start, end,locations[target])
+            path = self.get_turns_only(path)
+            turns = self.get_turns(path)
+            curr_min = len(turns)
+            paths.append(path)
+            all_turns.append(turns)
 
-                if curr_min < min_turns:
-                    min_turns = curr_min
-                    min_ind = i
-                path = []
-            return self.convert_to_space(paths[min_ind - 1][0:]), all_turns[min_ind - 1]
+            if curr_min < min_turns:
+                min_turns = curr_min
+                min_ind = i
+            path = []
+
 
         # Path from bot to induction
-        path_1 = self.get_turns_only(astar(bot_coords, locations_coords[induction], arena,locations[target]))
+        path_1 = self.get_turns_only(astar(arena, bot_coords, locations_coords[induction],None))
         turns_1 = self.get_turns(path_1)
 
         # Path from induction to location
-        path_2 = self.get_path(induction,target,induction)
-        turns_2 = self.get_turns(path_2)
+        path_2 = paths[min_ind]
+        turns_2 = all_turns[min_ind]
 
-        return self.convert_to_space(path_1[0:] + path_2[0:]), turns_1 + ['right', 'right'] + turns_2
-    
+
+        final_cell = path_2[-1]
+
+        row = final_cell[0]
+        col = final_cell[1]
+
+        if arena[row + 1][col] != 0:
+            path_vectors = [[row,col],[row+1,col]]
+
+        elif arena[row - 1][col]!= 0:
+            path_vectors = [[row,col],[row-1,col]]
+
+        elif arena[row][col+1]!= 0:
+            path_vectors = [[row,col],[row,col+1]]
+
+        else:
+            path_vectors = [[row,col],[row,col-1]]
+
+        print('Path 1:', path_1[:-1])
+        print('Turs 1:', self.get_align_command(bot_coords,path_1[:2]) + turns_1)
+        print('Path 2:',path_2)
+
+
+        print(path_2[-2:])
+        print('Turns 2:',['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors))
+
+        return path_1[:-1] + 
+        # print(path_1 + path_2[1:][:-1])
+        # print(self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1])
+        # return self.convert_to_space(path_1 + path_2[1:])[:-1],self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1]
+
+    def get_align_command(self, bot_coords, path_vectors):
+
+        direction = [path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1]]
+
+        if bot_coords[1] == 2 or bot_coords[1] == 6 or bot_coords[1] == 10: #Facing Right
+            bot_vector = [0,1]
+        elif bot_coords[1] == 5 or bot_coords[1] == 9 or bot_coords[1] == 13: #Facing Left
+            bot_vector = [0,-1]
+        elif bot_coords[0] == 1 or bot_coords[0] == 5 or bot_coords[0] == 9: #Facing Down
+            bot_vector = [1,0]
+        elif bot_coords[0] == 4 or bot_coords[0] == 8 or bot_coords[0] == 12: #Facing Up
+            bot_vector = [-1,0]
+
+        angle = atan2(bot_vector[0]*direction[1] - bot_vector[1]*direction[0], bot_vector[0]*direction[0] + bot_vector[1]*direction[1])
+
+        if angle > 0:
+            return ['left']
+
+        return ['right']
+
+    def get_drop_align(self,bot_vectors,path_vectors):
+        # print('BV:',bot_vectors)
+        a = (bot_vectors[1][0] - bot_vectors[0][0], bot_vectors[1][1] - bot_vectors[0][1])
+        b = (path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1])
+
+        angle = atan2(a[0]*b[1] - a[1]*b[0], a[0]*b[0] + a[1]*b[1])
+
+        if angle > 0:
+            return ['left_drop']
+        elif angle < 0:
+            return ['right_drop']
+        return ['drop']
+
     def get_turns_only(self,path):
         # print('Full Path:',path)
         out = [path[0]]
@@ -457,4 +540,6 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 
 if __name__ == '__main__':
     P = PathFinder(750, 700)
-    P.draw_path()
+    print(P.get_path('1', 'Kolkata', [175,75]))
+    # P.draw_path()
+
