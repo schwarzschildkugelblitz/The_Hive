@@ -296,15 +296,16 @@ class PathFinder:
         else:
             path_vectors = [[row,col],[row,col-1]]
 
-        print('Path 1:', path_1[:-1])
-        print('Turs 1:', self.get_align_command(bot_coords,path_1[:2]) + turns_1)
-        print('Path 2:',path_2)
+        # print('Path 1:', path_1[:-1])
+        # print('Turs 1:', self.get_align_command(bot_coords,path_1[:2]) + turns_1)
+        # print('Path 2:',path_2)
 
 
-        print(path_2[-2:])
-        print('Turns 2:',['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors))
+        # print(path_2[-2:])
+        # print('Turns 2:',['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors))
 
-        return path_1[:-1] + 
+        return self.convert_to_space(path_1[:-1] + path_2), self.get_align_command(bot_coords,path_1[:2]) + turns_1 + ['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors)
+        
         # print(path_1 + path_2[1:][:-1])
         # print(self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1])
         # return self.convert_to_space(path_1 + path_2[1:])[:-1],self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1]
@@ -541,5 +542,3 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 if __name__ == '__main__':
     P = PathFinder(750, 700)
     print(P.get_path('1', 'Kolkata', [175,75]))
-    # P.draw_path()
-
