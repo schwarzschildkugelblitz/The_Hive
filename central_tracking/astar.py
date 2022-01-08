@@ -296,15 +296,16 @@ class PathFinder:
         else:
             path_vectors = [[row,col],[row,col-1]]
 
-        print('Path 1:', path_1[:-1])
-        print('Turs 1:', self.get_align_command(bot_coords,path_1[:2]) + turns_1)
-        print('Path 2:',path_2)
+        # print('Path 1:', path_1[:-1])
+        # print('Turs 1:', self.get_align_command(bot_coords,path_1[:2]) + turns_1)
+        # print('Path 2:',path_2)
 
 
-        print(path_2[-2:])
-        print('Turns 2:',['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors))
+        # print(path_2[-2:])
+        # print('Turns 2:',['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors))
 
-        return path_1[:-1] + 
+        return self.convert_to_space(path_1[:-1] + path_2), self.get_align_command(bot_coords,path_1[:2]) + turns_1 + ['180']+turns_2 +self.get_drop_align(path_2[-2:],path_vectors)
+        
         # print(path_1 + path_2[1:][:-1])
         # print(self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1])
         # return self.convert_to_space(path_1 + path_2[1:])[:-1],self.get_align_command(bot_coords,path_1[:2]) + turns_1[1:] + ['180'] + turns_2[:-1]
@@ -457,7 +458,7 @@ def astar(_grid, start, end, extra):
 
         # finding children
         children = []
-        for new_position in [[0, -1], [0, 1], [1, 0], [-1, 0]]:  # Adjacent squares
+        for new_position in [[1, 0],[0, -1], [-1, 0],[0, 1]]:  # Adjacent squares
 
             # Get node position
             node_position = [current_node.position[0] + new_position[0], current_node.position[1] + new_position[1]]
@@ -490,25 +491,31 @@ def astar(_grid, start, end, extra):
             first = current_node.parent
             curr  = current_node
             last  = child
+            
             if first is not None :
+                # check to minimize turning by changing heuritic measurement
                 if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (curr.position[1] == last.position[1] and curr.position[0] != last.position[0])) :
-                    child.g += current_node.g + random.randrange(7,10,1)
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #check for right turn 
+                    child.g = current_node.g+4
+                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
+                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005))) 
                     child.f += child.g + child.h
                 
                 elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
-                    child.g += current_node.g + random.randrange(7,10,1)
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #check for right turn 
+                    child.g = current_node.g+4
+                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
+                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005)))
                     child.f += child.g + child.h
                 else :  
-                    child.g += current_node.g + 1
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #no turn condition 
+                    child.g = current_node.g + 3
+                    child.h = (pow((child.position[0] - end_node.position[0]) ,2)) + (
+                                pow((child.position[1] - end_node.position[1]) , 2))
                     child.f += child.g + child.h  
             else : 
-                child.g += current_node.g + 1
+                #first node case 
+                child.g = current_node.g + 1
                 child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
                     (child.position[1] - end_node.position[1]) ** 2)
                 child.f += child.g + child.h
@@ -535,5 +542,3 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 if __name__ == '__main__':
     P = PathFinder(750, 700)
     print(P.get_path('1', 'Kolkata', [175,75]))
-    # P.draw_path()
-
