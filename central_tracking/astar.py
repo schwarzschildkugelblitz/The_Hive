@@ -1,9 +1,13 @@
 """ this code was written by Harshit Batra and Rohan Deswal 
-
-as part of hive round 2 """
+    as part of hive round 2 
+    dependencies 
+        1 . pygame - pip install pygame
+ """
 import pygame
 from math import atan2
 import random
+from math import pow
+# assigin codes to dropchute 
 locations = {
     'Mumbai': 1,
     'Delhi': 2,
@@ -15,7 +19,7 @@ locations = {
     'Ahmedabad': 8,
     'Jaipur': 9
 }
-
+#defining position of dropchute in grid 
 locations_coords = {
     '1': (4, 0),
     '2': (9, 0),
@@ -163,12 +167,21 @@ class PathFinder:
                     pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(j * self.scale, i * self.scale,
                                                                           self.scale, self.scale), 2)
             # Draw Path
-            for cell in self.path:
-                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+            for cell in self.path[1:-1]:
+                pygame.draw.rect(game_display, (3, 252, 248), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
-            for cell in self.points_to_visit:
-                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                      self.scale, self.scale),2)
+            for cell in self.points_to_visit[0:1]:
+                pygame.draw.rect(game_display, (0,255,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
+                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                      self.scale, self.scale),2)
+            for cell in self.points_to_visit[1:]:
+                pygame.draw.rect(game_display, (163, 0, 68), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                      self.scale, self.scale))
+                pygame.draw.rect(game_display, (0,0,0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                      self.scale, self.scale),2)
 
             # Calculate Path Button
             x, y = pygame.mouse.get_pos()
@@ -361,7 +374,7 @@ def astar(_grid, start, end, extra):
 
         # finding children
         children = []
-        for new_position in [[0, -1], [0, 1], [1, 0], [-1, 0]]:  # Adjacent squares
+        for new_position in [[1, 0],[0, -1], [-1, 0],[0, 1]]:  # Adjacent squares
 
             # Get node position
             node_position = [current_node.position[0] + new_position[0], current_node.position[1] + new_position[1]]
@@ -394,25 +407,31 @@ def astar(_grid, start, end, extra):
             first = current_node.parent
             curr  = current_node
             last  = child
+            
             if first is not None :
+                # check to minimize turning by changing heuritic measurement
                 if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (curr.position[1] == last.position[1] and curr.position[0] != last.position[0])) :
-                    child.g += current_node.g + random.randrange(7,10,1)
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #check for right turn 
+                    child.g = current_node.g+4
+                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
+                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005))) 
                     child.f += child.g + child.h
                 
                 elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
-                    child.g += current_node.g + random.randrange(7,10,1)
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #check for right turn 
+                    child.g = current_node.g+4
+                    child.h = ((pow(abs(child.position[0] - end_node.position[0]) ,2.1005)) + (
+                                pow(abs(child.position[1] - end_node.position[1]) , 2.1005)))
                     child.f += child.g + child.h
                 else :  
-                    child.g += current_node.g + 1
-                    child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                                (child.position[1] - end_node.position[1]) ** 2)
+                    #no turn condition 
+                    child.g = current_node.g + 3
+                    child.h = (pow((child.position[0] - end_node.position[0]) ,2)) + (
+                                pow((child.position[1] - end_node.position[1]) , 2))
                     child.f += child.g + child.h  
             else : 
-                child.g += current_node.g + 1
+                #first node case 
+                child.g = current_node.g + 1
                 child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
                     (child.position[1] - end_node.position[1]) ** 2)
                 child.f += child.g + child.h
