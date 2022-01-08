@@ -24,7 +24,7 @@ bot_commands = [['right', 'right', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 35
+threshold = 30
 
 
 def special_command(bot_command):
@@ -38,7 +38,7 @@ def special_command(bot_command):
         drop -> Drop the package and 180° turn
     """
 
-    commands = {'left': 56, 'right': 57, 'stop': 58, 'drop': 59}  # speed
+    commands = {'left': 56, 'right': 57, 'stop': 58, 'right_drop': 59, 'left_drop': 60, 'drop': 61, '180': 62}  # speed
     # TODO implement delay = {'left': 1, 'right': 1, 'stop': 0, 'drop': 3}
 
     return commands[bot_command]
@@ -69,13 +69,16 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.015
-        self.Ki = 0.0009
-        self.Kd = 0.0
-        self.N = 3
+        self.Kp = 0.006
+        self.Ki = 0.003
+        self.Kd = 0.002
+        self.N = 3.6
         self.priority = [0, 1, 2, 3]
 
-    def command(self, detected_markers, detected_labels, queue):
+        self.signals = []
+        self.bot_group = 0
+
+    def command(self, detected_markers, detected_labels):
         """
         Generates and returns commands for the robots.
         Robots need to reach the next target in their respective paths
@@ -96,7 +99,9 @@ class ControlSystem:
             1 means the robot needs to turn anti-clockwise for correction
         """
 
-        for bot in self.bots[0:1]:
+        self.signals = []
+
+        for bot in self.bots:
 
             # iterate over all robots and store their coordinates
             if detected_labels is not None and bot.marker_id in detected_labels:
@@ -107,19 +112,21 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 0:
+                if bot.id == 0 or bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords)
                     bot.path = bot.path[1:-1]
+                    bot.path[-1] += "_drop"
                     # print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
-            print(bot.path[bot.step])
-            # if bot.id == 0:
+            # print(bot.path[bot.step])
+            if bot.id == 0:
+                print(bot.angle)
             #     print(bot.path, bot.step, bot.step)
                 # print(bot.commands)
 
             bot.set_angle()
 
-        for bot in self.bots[0:1]:
+        for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
             if bot.target_dist() < threshold:
                 bot.old_target = bot.path[bot.step]
@@ -148,17 +155,17 @@ class ControlSystem:
             #     print(bot.marker_id, speed, bot.path[bot.step])
                 # print(bot.marker_id, speed, bot.path[bot.step])
 
-            try:
-                print(f'From main thread: {signal}')
-                if speed > 55:
-                    queue.put(signal)
-                    queue.put(signal)
-                    queue.put(signal)
-                    queue.put(signal)
-                queue.put(signal)
-            except Full:
-                print("Queue is full")
-                continue
+            if speed > 55:
+                self.signals.append(signal)
+                self.signals.append(signal)
+                self.signals.append(signal)
+                self.signals.append(signal)
+
+            self.signals.append(signal)
+
+        # self.bot_group = (self.bot_group + 2) % 4
+
+        return self.signals
 
     # noinspection PyPep8Naming
     def pid(self, bot):

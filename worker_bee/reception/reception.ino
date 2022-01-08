@@ -15,9 +15,9 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 0
-#define LEFT 85//149 // speed of left motor
-#define RIGHT 100//140 // speed of right motor
+#define Worker_bee_Address 1
+#define LEFT 110//149 // speed of left motor
+#define RIGHT 111//140 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288
@@ -221,7 +221,24 @@ void loop()
           R.stp();
         }
         else if(spd1 == 59){ 
-          // drop
+          // right_drop
+          L.move(0,200);
+          R.move(0,200);
+          delay(30);
+          L.stp();
+          R.stp();
+          delay(100);
+          L.move(150,0);
+          R.move(0,150);
+          delay(315);
+          L.move(0,150);
+          R.move(150,0);
+          delay(20);
+          L.stp();
+          R.stp();
+          delay(50);
+          
+          
           L.move(0,200);
           R.move(0,200);
           delay(30);
@@ -229,14 +246,60 @@ void loop()
           R.stp();
           delay(150);
           
-          L.move(105,0);
-          R.move(110,0);
-          delay(640);
+          flipper_servo.write(-130);
+          delay(500);  
+          flipper_servo.write(1120);
+          delay(100);
+        }
+        else if(spd1 == 60)
+        // left_drop
+        {
+          L.move(0,200);
+          R.move(0,200);
+          delay(30);
           L.stp();
           R.stp();
+          delay(100);
+          L.move(0,150);
+          R.move(150,0);
+          delay(315);
+          L.move(150,0);
+          R.move(0,150);
+          delay(20);
+          L.stp();
+          R.stp();
+          delay(50);
+          
+          
+          L.move(0,200);
+          R.move(0,200);
+          delay(30);
+          L.stp();
+          R.stp();
+          delay(150);
+          
           flipper_servo.write(-130);
-          delay(1000);  
+          delay(500);  
           flipper_servo.write(1120);
+          delay(100);
+        }
+        else if (spd1 == 61)
+        // drop
+        {
+          L.move(0,200);
+          R.move(0,200);
+          delay(30);
+          L.stp();
+          R.stp();
+          delay(150);
+          
+          flipper_servo.write(-130);
+          delay(500);  
+          flipper_servo.write(1120);
+          delay(100);
+        }
+        else if (spd1 == 62)
+        {
           delay(100);
           L.move(150,0);
           R.move(0,150);
@@ -245,25 +308,8 @@ void loop()
           R.move(150,0);
           delay(20);
           L.stp();
-          R.stp();
-          delay(50);
+          R.stp();  
         }
-        else if(spd1 == 60)
-        // left angle
-        {
-          L.stp();
-          R.stp();
-          L.move(150,0);
-          R.move(0,150);
-          delay(200);
-          L.stp();
-          R.stp();
-        }
-        else if (spd1 == 61)
-        // left drop
-        {}
-        else if (spd1 == 62)
-        {}
         //180
         else if (spd1 == 63);
         //null  

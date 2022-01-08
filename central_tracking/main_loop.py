@@ -19,8 +19,7 @@ from marker_detection import Camera
 from serialcommunication import SerialCommunication
 from control_system import ControlSystem
 
-from multiprocessing import Process, Queue
-from queue import Empty
+from multiprocessing import Process, Pipe
 
 """
 The width and height of final processed window is to be d
@@ -37,22 +36,20 @@ camera = Camera(width=width, height=height, camera=1, extra_height=extra_height)
 control = ControlSystem(width, height)
 
 
-def send_signal(process_queue):
+def send_signal(conn):
 
     arduino = SerialCommunication("COM4", 115200)
 
     while True:
-        try:
-            signal = process_queue.get()
-        except Empty:
-            continue
+        signals = conn.recv()
 
-        arduino.send(signal)
-        print(signal)
-        time.sleep(0.02)
+        for signal in signals:
+            arduino.send(signal)
+            # print(signal)
+            time.sleep(0.01)
 
 
-def main(process_queue):
+def main(conn):
     # detect corners and unwarp the image
     camera.detect_corners()
 
@@ -63,13 +60,15 @@ def main(process_queue):
 
         markers, labels, video_feed = camera.detect_markers()
 
-        control.command(markers, labels, process_queue)
+        signals = control.command(markers, labels)
         control.draw_packages(video_feed)
+
+        conn.send(signals)
 
         cv2.imshow("Arena", video_feed)
 
         # exit condition, press key 'd'
-        if cv2.waitKey(100) & 0xFF == ord('d'):
+        if cv2.waitKey(50) & 0xFF == ord('d'):
             break
 
     camera.capture.release()
@@ -77,12 +76,12 @@ def main(process_queue):
 
 
 if __name__ == "__main__":
-    queue = Queue()
-    serial_process = Process(target=send_signal, args=(queue,))
+    parent_conn, child_conn = Pipe()
+    serial_process = Process(target=send_signal, args=(child_conn,))
     serial_process.daemon = True
     serial_process.start()
 
-    main(queue)
+    main(parent_conn)
 
     serial_process.join()
     exit()
