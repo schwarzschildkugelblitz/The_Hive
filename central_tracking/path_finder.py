@@ -2,7 +2,7 @@
 
 as part of hive round 2 """
 import pygame
-from math import atan2, pi
+from math import atan2, pi, degrees
 import random
 from astar import astar
 
@@ -126,28 +126,22 @@ arena = [[-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 
-def get_align_command(bot_coords, path_vectors):
+def get_bot_angle(bot_top_left, bot_bottom_left):
+    return atan2(bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0])
 
+
+def get_align_command(bot_vector, path_vectors):
     direction = [path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1]]
-    bot_vector = [0, 0]
-    if bot_coords[1] == 2 or bot_coords[1] == 6 or bot_coords[1] == 10:  # Facing Right
-        bot_vector = [0, 1]
-    elif bot_coords[1] == 5 or bot_coords[1] == 9 or bot_coords[1] == 13:  # Facing Left
-        bot_vector = [0, -1]
-    elif bot_coords[0] == 1 or bot_coords[0] == 5 or bot_coords[0] == 9:  # Facing Down
-        bot_vector = [1, 0]
-    elif bot_coords[0] == 4 or bot_coords[0] == 8 or bot_coords[0] == 12:  # Facing Up
-        bot_vector = [-1, 0]
 
-    if bot_vector[0] == 0 and bot_vector[1] == 0:
-        raise Exception("Unexpected Bot Vector")
     angle = atan2(bot_vector[0] * direction[1] - bot_vector[1] * direction[0],
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
-    if angle > 0:
+    angle = degrees(angle)
+    if angle == 90:
         return ['left']
-
-    return ['right']
+    elif angle == -90:
+        return ['right']
+    return ['180']
 
 
 def get_turns_only(path):
@@ -182,7 +176,6 @@ def get_drop_align(bot_vectors, path_vectors):
 
 
 def get_turns(turns_only_path):
-
     turns = []
 
     for i in range(1, len(turns_only_path) - 1):
@@ -321,7 +314,7 @@ class PathFinder:
         pygame.quit()
         quit()
 
-    def get_path(self, induction, target, location):
+    def get_path(self, induction, target, location, bot_top_left, bot_bottom_left):
 
         paths = []
         all_turns = []
@@ -367,8 +360,8 @@ class PathFinder:
 
         else:
             path_vectors = [[row, col], [row, col - 1]]
-
-        return self.convert_to_space(path_1[:-1] + path_2), get_align_command(bot_coords, path_1[:2]) + turns_1 + [
+        bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
+        return self.convert_to_space(path_1[:-1] + path_2), get_align_command(bot_vector, path_1[:2]) + turns_1 + [
             '180'] + turns_2 + get_drop_align(path_2[-2:], path_vectors)
 
     def set_blocks(self, blocks):
@@ -401,4 +394,3 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 
 if __name__ == '__main__':
     P = PathFinder(750, 700)
-    print(P.get_path('1', 'Kolkata', [175, 75]))
