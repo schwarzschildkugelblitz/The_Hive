@@ -2,8 +2,8 @@
 
 as part of hive round 2 """
 import pygame
-from math import atan2, pi
-import random
+from math import atan2
+
 locations = {
     'Mumbai': 1,
     'Delhi': 2,
@@ -322,6 +322,8 @@ class PathFinder:
             bot_vector = [1,0]
         elif bot_coords[0] == 4 or bot_coords[0] == 8 or bot_coords[0] == 12: #Facing Up
             bot_vector = [-1,0]
+        else:
+            raise Exception('Unexpected bot location')
 
         angle = atan2(bot_vector[0]*direction[1] - bot_vector[1]*direction[0], bot_vector[0]*direction[0] + bot_vector[1]*direction[1])
 
@@ -469,8 +471,9 @@ def astar(_grid, start, end, extra):
                 continue
 
             # Make sure walkable terrain
-            if grid[node_position[0]][node_position[1]] != 0 and grid[node_position[0]][node_position[1]] != -2 and \
-                    grid[node_position[0]][node_position[1]] != extra:
+            loc_0 = int(node_position[0])
+            loc_1 = int(node_position[1])
+            if grid[loc_0][loc_1] not in [0, -2, extra]:
                 continue
 
             # Create new node

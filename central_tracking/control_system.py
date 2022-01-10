@@ -112,15 +112,24 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 0 or bot.id == 1:
+                if bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords)
-                    bot.path = bot.path[1:-1]
-                    bot.path[-1] += "_drop"
-                    # print(bot.path, bot.commands, sep='\n')
+                    print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
+
+            if bot.target_dist() < threshold:
+                bot.old_target = bot.path[bot.step]
+                speed = special_command(bot.get_command())
+
+                speed_data = int(4 * abs(speed) + bot.id)
+                speed_sign = 1 if speed < 0 else 0
+
+                signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
+                return [signal]
+
             # print(bot.path[bot.step])
-            if bot.id == 0:
-                print(bot.angle)
+            # if bot.id == 0:
+            #     print(bot.angle)
             #     print(bot.path, bot.step, bot.step)
                 # print(bot.commands)
 
@@ -128,13 +137,7 @@ class ControlSystem:
 
         for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
-            if bot.target_dist() < threshold:
-                bot.old_target = bot.path[bot.step]
-                speed = special_command(bot.get_command())
-                self.integrator_state[bot.id] = 0.0
-                self.filter_state[bot.id] = 0.0
-            else:
-                speed = self.pid(bot)
+            speed = self.pid(bot)
 
             if bot.old_target_dist() < threshold:
                 self.integrator_state[bot.id] = 0.0
@@ -153,7 +156,7 @@ class ControlSystem:
 
             # if bot.id == 2:
             #     print(bot.marker_id, speed, bot.path[bot.step])
-                # print(bot.marker_id, speed, bot.path[bot.step])
+            #     print(bot.marker_id, speed, bot.path[bot.step])
 
             if speed > 55:
                 self.signals.append(signal)
@@ -163,8 +166,7 @@ class ControlSystem:
 
             self.signals.append(signal)
 
-        # self.bot_group = (self.bot_group + 2) % 4
-
+        self.bot_group = (self.bot_group + 2) % 4
         return self.signals
 
     # noinspection PyPep8Naming
