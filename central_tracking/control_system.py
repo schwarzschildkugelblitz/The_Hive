@@ -5,7 +5,7 @@ from queue import Full
 
 from bot import Bot
 from fetch_job import job_generator
-from astar import PathFinder
+from path_finder import PathFinder
 
 robots = [4, 5, 6, 7]  # marker labels of robots
 
@@ -24,7 +24,7 @@ bot_commands = [['right', 'right', 'stop'],
                 ['left', 'drop', 'right', 'stop']]
 
 # proximity threshold to the target coordinate of path
-threshold = 30
+threshold = 50
 
 
 def special_command(bot_command):
@@ -112,10 +112,21 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 1:
-                    bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords)
+                if bot.id == 0:
+                    bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords,
+                                                                       bot.marker[0], bot.marker[3])
                     print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
+
+            # print(bot.path[bot.step])
+            # if bot.id == 0:
+            #     print(bot.angle)
+            #     print(bot.path, bot.step, bot.step)
+            #     print(bot.commands)
+
+            bot.set_angle()
+
+        for bot in self.bots[self.bot_group:self.bot_group + 1]:
 
             if bot.target_dist() < threshold:
                 bot.old_target = bot.path[bot.step]
@@ -126,18 +137,8 @@ class ControlSystem:
 
                 signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
                 return [signal]
-
-            # print(bot.path[bot.step])
-            # if bot.id == 0:
-            #     print(bot.angle)
-            #     print(bot.path, bot.step, bot.step)
-                # print(bot.commands)
-
-            bot.set_angle()
-
-        for bot in self.bots[self.bot_group:self.bot_group + 2]:
-
-            speed = self.pid(bot)
+            else:
+                speed = self.pid(bot)
 
             if bot.old_target_dist() < threshold:
                 self.integrator_state[bot.id] = 0.0
@@ -154,9 +155,9 @@ class ControlSystem:
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
-            # if bot.id == 2:
-            #     print(bot.marker_id, speed, bot.path[bot.step])
-            #     print(bot.marker_id, speed, bot.path[bot.step])
+            if bot.id == 0:
+                print(bot.marker_id, speed, bot.path[bot.step])
+                print(bot.marker_id, speed, bot.path[bot.step])
 
             if speed > 55:
                 self.signals.append(signal)
@@ -166,7 +167,7 @@ class ControlSystem:
 
             self.signals.append(signal)
 
-        self.bot_group = (self.bot_group + 2) % 4
+        # self.bot_group = (self.bot_group + 2) % 4
         return self.signals
 
     # noinspection PyPep8Naming

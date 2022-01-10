@@ -2,8 +2,7 @@
 
 as part of hive round 2 """
 import pygame
-from math import atan2, pi, degrees
-import random
+from math import atan2, degrees
 from astar import astar
 
 locations = {
@@ -131,15 +130,18 @@ def get_bot_angle(bot_top_left, bot_bottom_left):
 
 
 def get_align_command(bot_vector, path_vectors):
+    angle_threshold = 30
+
     direction = [path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1]]
 
     angle = atan2(bot_vector[0] * direction[1] - bot_vector[1] * direction[0],
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
     angle = degrees(angle)
-    if angle == 90:
+
+    if abs(angle - 90) < angle_threshold:
         return ['left']
-    elif angle == -90:
+    elif abs(angle + 90) < angle_threshold:
         return ['right']
     return ['180']
 
@@ -334,7 +336,6 @@ class PathFinder:
             if curr_min < min_turns:
                 min_turns = curr_min
                 min_ind = i
-            path = []
 
         # Path from bot to induction
         path_1 = get_turns_only(astar(arena, bot_coords, locations_coords[induction], None))

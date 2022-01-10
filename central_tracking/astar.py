@@ -73,8 +73,9 @@ def astar(_grid, start, end, extra):
                 continue
 
             # Make sure walkable terrain
-            if grid[node_position[0]][node_position[1]] != 0 and grid[node_position[0]][node_position[1]] != -2 and \
-                    grid[node_position[0]][node_position[1]] != extra:
+            loc_0 = int(node_position[0])
+            loc_1 = int(node_position[1])
+            if grid[loc_0][loc_1] != 0 and grid[loc_0][loc_1] != -2 and grid[loc_0][loc_1] != extra:
                 continue
 
             # Create new node
