@@ -16,8 +16,8 @@ dependies
 #include <RH_NRF24.h> //NRF library 
 
 #define Worker_bee_Address 0
-#define LEFT 110//149 // speed of left motor
-#define RIGHT 112//140 // speed of right motor
+#define LEFT 107//149 // speed of left motor
+#define RIGHT 111//140 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288
@@ -250,6 +250,13 @@ void loop()
           delay(500);  
           flipper_servo.write(1120);
           delay(100);
+
+          delay(20);
+          L.move(0,150);
+          R.move(0,150);
+          delay(250);
+          L.stp();
+          R.stp();
         }
         else if(spd1 == 60)
         // left_drop
@@ -282,6 +289,13 @@ void loop()
           delay(500);  
           flipper_servo.write(1120);
           delay(100);
+
+          delay(20);
+          L.move(0,150);
+          R.move(0,150);
+          delay(250);
+          L.stp();
+          R.stp();
         }
         else if (spd1 == 61)
         // drop
@@ -297,6 +311,13 @@ void loop()
           delay(500);  
           flipper_servo.write(1120);
           delay(100);
+
+          delay(20);
+          L.move(0,150);
+          R.move(0,150);
+          delay(250);
+          L.stp();
+          R.stp();
         }
         else if (spd1 == 62)
         //180

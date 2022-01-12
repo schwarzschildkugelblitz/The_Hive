@@ -25,6 +25,9 @@ class Bot:
         self.step = 0
         self.angle = 0
 
+        self.command_start = time.time()
+        self.command_delay = 0
+
         self.old_target = np.zeros(2)
 
         self.last_time = time.time()
@@ -34,10 +37,14 @@ class Bot:
             return True
 
     def get_command(self):
-        command = self.commands[self.step]
+        try:
+            command = self.commands[self.step]
+        except IndexError:
+            return 'stop'
+
         self.step += 1
 
-        if self.step == len(self.path):
+        if self.step >= len(self.path):
             self.step = 0
             self.idle = True
 

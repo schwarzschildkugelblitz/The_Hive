@@ -130,7 +130,7 @@ def get_bot_angle(bot_top_left, bot_bottom_left):
 
 
 def get_align_command(bot_vector, path_vectors):
-    angle_threshold = 30
+    angle_threshold = 45
 
     direction = [path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1]]
 
@@ -143,6 +143,8 @@ def get_align_command(bot_vector, path_vectors):
         return ['left']
     elif abs(angle + 90) < angle_threshold:
         return ['right']
+    elif abs(angle) < angle_threshold:
+        return ['stop']
     return ['180']
 
 
@@ -379,8 +381,20 @@ class PathFinder:
 
     def convert_to_space(self, points):
         space_points = []
+        off = 10
         for point in points:
-            space_points.append([point[1] * self.scale + self.scale // 2, point[0] * self.scale + self.scale // 2])
+            x = point[1] * self.scale + self.scale // 2
+            y = point[0] * self.scale + self.scale // 2
+
+            if x in [2, 6, 10] and y not in [1, 5, 9, 4, 8, 12]:
+                x -= off
+            elif x in [5, 9, 13] and y not in [1, 5, 9, 4, 8, 12]:
+                x += off
+            elif y in [1, 5, 9] and x not in [2, 6, 10, 5, 9, 13]:
+                y -= off
+            elif y in [4, 8, 12] and x not in [2, 6, 10, 5, 9, 13]:
+                y += off
+            space_points.append([x, y])
         return space_points
 
 

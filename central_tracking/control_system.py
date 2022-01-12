@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from time import time
+import time
 from queue import Full
 
 from bot import Bot
@@ -9,22 +9,8 @@ from path_finder import PathFinder
 
 robots = [4, 5, 6, 7]  # marker labels of robots
 
-# Path for each robot to follow
-path = [
-    np.array([(14.5 / 15, 4.5 / 14), (14.5 / 15, 6.5 / 14), (0.5 / 15, 6.5 / 14)]),
-    np.array([(14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
-    np.array([(14.5 / 15, 6.5 / 14), (14.5 / 15, 8.5 / 14), (0.5 / 15, 8.5 / 14)]),
-    np.array([(11.5 / 20, 8.5 / 10), (17.5 / 20, 8.5 / 10), (11.5 / 20, 8.5 / 10), (11.5 / 20, 0.5 / 10)])
-]
-
-# special command for each robot after each step through path
-bot_commands = [['right', 'right', 'stop'],
-                ['right', 'right', 'stop'],
-                ['right', 'right', 'stop'],
-                ['left', 'drop', 'right', 'stop']]
-
 # proximity threshold to the target coordinate of path
-threshold = 50
+threshold = 40
 
 
 def special_command(bot_command):
@@ -39,9 +25,9 @@ def special_command(bot_command):
     """
 
     commands = {'left': 56, 'right': 57, 'stop': 58, 'right_drop': 59, 'left_drop': 60, 'drop': 61, '180': 62}  # speed
-    # TODO implement delay = {'left': 1, 'right': 1, 'stop': 0, 'drop': 3}
+    delay = {'left': 0.5, 'right': 0.5, 'stop': 0.5, 'right_drop': 3, 'left_drop': 3, 'drop': 2, '180': 2}  # delay
 
-    return commands[bot_command]
+    return commands[bot_command], delay[bot_command]
 
 
 class ControlSystem:
@@ -58,21 +44,13 @@ class ControlSystem:
         self.job = job_generator()
         self.path_finder = PathFinder(self.width, self.height)
 
-        for i, robo_path in enumerate(path):
-            for target_point in robo_path:
-                target_point[0] *= self.width
-                target_point[1] *= self.height
-
-            self.bots[i].path = robo_path
-            self.bots[i].commands = bot_commands[i]
-
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.006
-        self.Ki = 0.003
-        self.Kd = 0.002
-        self.N = 3.6
+        self.Kp = 0.0071/20
+        self.Ki = 3.1364/20
+        self.Kd = 0.14/20
+        self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
         self.signals = []
@@ -128,15 +106,14 @@ class ControlSystem:
 
         for bot in self.bots[self.bot_group:self.bot_group + 1]:
 
-            if bot.target_dist() < threshold:
+            if time.time() - bot.command_start < bot.command_delay:
+                continue
+
+            if bot.target_dist() < threshold or bot.step >= len(bot.commands):
                 bot.old_target = bot.path[bot.step]
-                speed = special_command(bot.get_command())
 
-                speed_data = int(4 * abs(speed) + bot.id)
-                speed_sign = 1 if speed < 0 else 0
-
-                signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
-                return [signal]
+                bot.command_start = time.time()
+                speed, bot.command_delay = special_command(bot.get_command())
             else:
                 speed = self.pid(bot)
 
@@ -156,8 +133,10 @@ class ControlSystem:
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
             if bot.id == 0:
-                print(bot.marker_id, speed, bot.path[bot.step])
-                print(bot.marker_id, speed, bot.path[bot.step])
+                try:
+                    print(bot.marker_id, speed, bot.path[bot.step])
+                except IndexError:
+                    print(bot.marker_id, speed, 'stop')
 
             if speed > 55:
                 self.signals.append(signal)
@@ -173,8 +152,8 @@ class ControlSystem:
     # noinspection PyPep8Naming
     def pid(self, bot):
 
-        delta_t = time() - bot.last_time
-        bot.last_time = time()
+        delta_t = time.time() - bot.last_time
+        bot.last_time = time.time()
 
         theta = bot.angle
 
