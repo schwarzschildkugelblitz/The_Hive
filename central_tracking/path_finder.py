@@ -383,17 +383,18 @@ class PathFinder:
         space_points = []
         off = 10
         for point in points:
-            x = point[1] * self.scale + self.scale // 2
-            y = point[0] * self.scale + self.scale // 2
-
+            xoff = 0
             if x in [2, 6, 10] and y not in [1, 5, 9, 4, 8, 12]:
-                x -= off
+                xoff = -off
             elif x in [5, 9, 13] and y not in [1, 5, 9, 4, 8, 12]:
-                x += off
+                xoff = off
             elif y in [1, 5, 9] and x not in [2, 6, 10, 5, 9, 13]:
-                y -= off
+                yoff = -off
             elif y in [4, 8, 12] and x not in [2, 6, 10, 5, 9, 13]:
-                y += off
+                yoff = off
+
+            x = point[1] * self.scale + self.scale // 2 + xoff
+            y = point[0] * self.scale + self.scale // 2 + yoff
             space_points.append([x, y])
         return space_points
 
