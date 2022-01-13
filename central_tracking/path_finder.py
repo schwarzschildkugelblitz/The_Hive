@@ -130,7 +130,7 @@ def get_bot_angle(bot_top_left, bot_bottom_left):
 
 
 def get_align_command(bot_vector, path_vectors):
-    angle_threshold = 45
+    angle_threshold = 90
 
     direction = [path_vectors[1][0] - path_vectors[0][0], path_vectors[1][1] - path_vectors[0][1]]
 
@@ -384,13 +384,13 @@ class PathFinder:
         off = 10
         for point in points:
             xoff = 0
-            if x in [2, 6, 10] and y not in [1, 5, 9, 4, 8, 12]:
+            if x in [2, 6, 10]:
                 xoff = -off
-            elif x in [5, 9, 13] and y not in [1, 5, 9, 4, 8, 12]:
+            if x in [5, 9, 13]:
                 xoff = off
-            elif y in [1, 5, 9] and x not in [2, 6, 10, 5, 9, 13]:
+            if y in [1, 5, 9]:
                 yoff = -off
-            elif y in [4, 8, 12] and x not in [2, 6, 10, 5, 9, 13]:
+            if y in [4, 8, 12]:
                 yoff = off
 
             x = point[1] * self.scale + self.scale // 2 + xoff
@@ -410,3 +410,4 @@ def set_text(string, coordx, coordy, font_size):  # Function to set text
 
 if __name__ == '__main__':
     P = PathFinder(750, 700)
+    P.draw_path()
