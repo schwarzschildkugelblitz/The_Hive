@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-collision_threshold = 70
+collision_threshold = 150
 
 
 def distance(p1, p2):

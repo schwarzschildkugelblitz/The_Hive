@@ -10,7 +10,7 @@ from path_finder import PathFinder
 robots = [4, 5, 6, 7]  # marker labels of robots
 
 # proximity threshold to the target coordinate of path
-threshold = 40
+threshold = 25
 
 
 def special_command(bot_command):
@@ -47,9 +47,9 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.0071/20
-        self.Ki = 3.1364/20
-        self.Kd = 0.14/20
+        self.Kp = 0.0071/30
+        self.Ki = 3.1364/30
+        self.Kd = 0.14/30
         self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
@@ -90,7 +90,7 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 0:
+                if bot.id == 0 or bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     print(bot.path, bot.commands, sep='\n')
@@ -104,7 +104,7 @@ class ControlSystem:
 
             bot.set_angle()
 
-        for bot in self.bots[self.bot_group:self.bot_group + 1]:
+        for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
             if time.time() - bot.command_start < bot.command_delay:
                 continue
@@ -114,6 +114,7 @@ class ControlSystem:
 
                 bot.command_start = time.time()
                 speed, bot.command_delay = special_command(bot.get_command())
+                print("Hello1", speed)
             else:
                 speed = self.pid(bot)
 
@@ -125,7 +126,10 @@ class ControlSystem:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
                         # TODO call pathfinding and get new path with high_priority robot as obstacle
-                        speed = special_command('stop')
+                        bot.command_start = time.time()
+                        self.integrator_state[bot.id] = 0.0
+                        self.filter_state[bot.id] = 0.0
+                        speed, bot.command_delay = special_command('stop')
 
             speed_data = int(4 * abs(speed) + bot.id)
             speed_sign = 1 if speed < 0 else 0
