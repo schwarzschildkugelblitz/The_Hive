@@ -1,6 +1,7 @@
 """ this code was written by Harshit Batra and Rohan Deswal 
 
 as part of hive round 2 """
+import numpy as np
 import pygame
 from math import atan2, degrees
 from astar import astar
@@ -56,12 +57,12 @@ locations_coords = {
     'Bengaluru1': (5, 7),
     'Bengaluru2': (5, 8),
     'Bengaluru3': (6, 9),
-    'Bengaluru4': (8, 8),
+    'Bengaluru4': (7, 9),
     'Bengaluru5': (8, 8),
     'Bengaluru6': (8, 7),
-    'Bengaluru7': (8, 6),
+    'Bengaluru7': (6, 6),
     'Bengaluru8': (7, 6),
-    'Hyderabad1': (6, 6),
+    'Hyderabad1': (8, 12),
     'Hyderabad2': (5, 11),
     'Hyderabad3': (5, 12),
     'Hyderabad4': (6, 13),
@@ -197,6 +198,16 @@ def get_turns(turns_only_path):
     return turns
 
 
+def get_distance(path):
+    dist = 0
+    for i in range(len(path) - 1):
+        y1, x1 = path[i]
+        y2, x2 = path[i + 1]
+
+        dist += ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
+    return dist
+
+
 class PathFinder:
     def __init__(self, w, h):
         self.width = w
@@ -326,19 +337,29 @@ class PathFinder:
         bot_coords = [location[1] // self.scale, location[0] // self.scale]
         start = locations_coords[induction]
         min_turns = float('inf')
+        min_dist = float('inf')
         min_ind = 0
+        turn_ind_list = []
         for i in range(1, 9):
             end = locations_coords[target + str(i)]
-            path = astar(arena, start, end, locations[target])
+            path = astar(arena, start, end, None)
             path = get_turns_only(path)
             turns = get_turns(path)
-            curr_min = len(turns)
             paths.append(path)
             all_turns.append(turns)
 
-            if curr_min < min_turns:
-                min_turns = curr_min
-                min_ind = i
+            turn_ind_list.append([i - 1, len(turns)])
+
+        for ind in turn_ind_list:
+            if ind[1] < min_turns:
+                min_turns = ind[1]
+
+        for i in range(len(turn_ind_list)):
+            if turn_ind_list[i][1] == min_turns:
+                distance = get_distance(paths[turn_ind_list[i][0]])
+                if distance < min_dist:
+                    min_dist = distance
+                    min_ind = turn_ind_list[i][0]
 
         # Path from bot to induction
         path_1 = get_turns_only(astar(arena, bot_coords, locations_coords[induction], None))
@@ -382,12 +403,12 @@ class PathFinder:
 
     def convert_to_space(self, points):
         space_points = []
-        off = 10
+        off = 20
         for point in points:
             x = point[1]
             y = point[0]
             xoff, yoff = 0, 0
-            if x in [2, 6, 10]:
+            if x in [2, 6, 10, 0]:
                 xoff = -off
             if x in [5, 9, 13]:
                 xoff = off
@@ -397,11 +418,13 @@ class PathFinder:
             if y in [4, 8, 12]:
                 if x > 1:
                     yoff = off
+            if x == 1:
+                xoff = off
 
             x = point[1] * self.scale + self.scale // 2 + xoff
             y = point[0] * self.scale + self.scale // 2 + yoff
             space_points.append([x, y])
-        return space_points
+        return np.array(space_points, dtype=np.int32)
 
 
 def set_text(string, coordx, coordy, font_size):  # Function to set text

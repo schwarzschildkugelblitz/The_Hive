@@ -111,20 +111,20 @@ def astar(_grid, start, end, extra):
                         curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
                     # check for right turn
                     child.g = current_node.g + 9
-                    child.h = ((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
-                        pow(abs(child.position[1] - end_node.position[1]), 2)))
+                    child.h = int(((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
+                        pow(abs(child.position[1] - end_node.position[1]), 2))))
                     child.f += child.g + child.h
                 else:
                     # no turn condition
                     child.g = current_node.g + 1
-                    child.h = (pow(abs(child.position[0] - end_node.position[0]), 2)) + (
-                        pow(abs(child.position[1] - end_node.position[1]), 2))
+                    child.h = int((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
+                        pow(abs(child.position[1] - end_node.position[1]), 2)))
                     child.f += child.g + child.h
             else:
                 # first node case
                 child.g = current_node.g + 1
-                child.h = ((child.position[0] - end_node.position[0]) ** 2) + (
-                        (child.position[1] - end_node.position[1]) ** 2)
+                child.h = int(((child.position[0] - end_node.position[0]) ** 2) + (
+                        (child.position[1] - end_node.position[1]) ** 2))
                 child.f += child.g + child.h
 
             # Child is already in the open list

@@ -16,7 +16,7 @@ class Bot:
         self.id = bot_id
         self.marker_id = marker_id
         self.marker = np.zeros((4, 2), dtype=np.float32)
-        self.coords = np.zeros(2, dtype=np.float32)
+        self.coords = np.array([-200, -200], dtype=np.float32)
         self.idle = True
         self.payload = ""
 
@@ -25,6 +25,7 @@ class Bot:
         self.step = 0
         self.angle = 0
 
+        self.blocked = False
         self.command_start = time.time()
         self.command_delay = 0
 
@@ -32,8 +33,13 @@ class Bot:
 
         self.last_time = time.time()
 
+        self.path_color = (0, 0, 0)
+
     def check_collision(self, other_bot):
-        if distance(self.coords, other_bot.coords) < collision_threshold:
+        dist = distance(self.coords, other_bot.coords)
+        if dist < collision_threshold:
+            if dist < collision_threshold/2:
+                other_bot.blocked = True
             return True
 
     def get_command(self):

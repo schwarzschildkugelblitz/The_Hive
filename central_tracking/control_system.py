@@ -1,16 +1,15 @@
 import cv2
 import numpy as np
 import time
-from queue import Full
 
 from bot import Bot
 from fetch_job import job_generator
-from path_finder import PathFinder
+from path_finder import PathFinder, locations, colors
 
 robots = [4, 5, 6, 7]  # marker labels of robots
 
 # proximity threshold to the target coordinate of path
-threshold = 25
+threshold = 40
 
 
 def special_command(bot_command):
@@ -47,9 +46,9 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.0071/30
-        self.Ki = 3.1364/30
-        self.Kd = 0.14/30
+        self.Kp = 0.0071 / 30
+        self.Ki = 3.1364 / 30
+        self.Kd = 0.14 / 30
         self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
@@ -90,9 +89,10 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 0 or bot.id == 1:
+                if bot.id == 0:  # or bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords,
                                                                        bot.marker[0], bot.marker[3])
+                    bot.path_color = colors[locations[job[2]]]
                     print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
 
@@ -102,11 +102,13 @@ class ControlSystem:
             #     print(bot.path, bot.step, bot.step)
             #     print(bot.commands)
 
+            bot.blocked = False
             bot.set_angle()
 
-        for bot in self.bots[self.bot_group:self.bot_group + 2]:
+        for bot in self.bots[self.bot_group:self.bot_group + 1]:
 
             if time.time() - bot.command_start < bot.command_delay:
+                bot.idle = False
                 continue
 
             if bot.target_dist() < threshold or bot.step >= len(bot.commands):
@@ -114,7 +116,6 @@ class ControlSystem:
 
                 bot.command_start = time.time()
                 speed, bot.command_delay = special_command(bot.get_command())
-                print("Hello1", speed)
             else:
                 speed = self.pid(bot)
 
@@ -124,7 +125,7 @@ class ControlSystem:
 
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
-                    if bot.check_collision(self.bots[high_priority_bot_id]):
+                    if bot.check_collision(self.bots[high_priority_bot_id]) or bot.blocked:
                         # TODO call pathfinding and get new path with high_priority robot as obstacle
                         bot.command_start = time.time()
                         self.integrator_state[bot.id] = 0.0
@@ -136,7 +137,7 @@ class ControlSystem:
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
-            if bot.id == 0:
+            if bot.id == 1:
                 try:
                     print(bot.marker_id, speed, bot.path[bot.step])
                 except IndexError:
@@ -183,6 +184,10 @@ class ControlSystem:
 
     def draw_packages(self, video_feed):
         for bot in self.bots:
-            if any(bot.coords != np.zeros(2)):
-                cv2.putText(video_feed, bot.payload, bot.coords.astype(np.int32), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8,
-                            (0, 0, 0), 1, cv2.LINE_8)
+            if bot.id == 0:  # or bot.id == 1:
+                for i in range(len(bot.path) - 1):
+                    cv2.line(video_feed, bot.path[i], bot.path[i + 1], bot.path_color[::-1], 4)
+                if any(bot.coords != np.zeros(2)):
+                    cv2.putText(video_feed, bot.payload, bot.coords.astype(np.int32), cv2.FONT_HERSHEY_COMPLEX_SMALL,
+                                0.8,
+                                bot.path_color[::-1], 1, cv2.LINE_8)

@@ -15,8 +15,8 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 1
-#define LEFT 103 // speed of left motor
+#define Worker_bee_Address 0
+#define LEFT 107 // speed of left motor
 #define RIGHT 111 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
@@ -238,8 +238,8 @@ void loop()
           delay(50);
           
           
-          L.move(148,0);
-          R.move(156,0);
+          L.move(150,0);
+          R.move(150,0);
           delay(300);
           L.stp();
           R.stp();
@@ -250,8 +250,8 @@ void loop()
           flipper_servo.write(1120);
           delay(100);
       
-          L.move(0,148);
-          R.move(0,156);
+          L.move(0,150);
+          R.move(0,150);
           delay(250);
           L.stp();
           R.stp();
@@ -276,8 +276,8 @@ void loop()
           delay(50);
           
           
-          L.move(148,0);
-          R.move(156,0);
+          L.move(150,0);
+          R.move(150,0);
           delay(300);
           L.stp();
           R.stp();
@@ -288,8 +288,8 @@ void loop()
           flipper_servo.write(1120);
           delay(100);
       
-          L.move(0,148);
-          R.move(0,156);
+          L.move(0,150);
+          R.move(0,150);
           delay(250);
           L.stp();
           R.stp();
@@ -297,8 +297,8 @@ void loop()
         else if (spd1 == 61)
         // drop
         {
-          L.move(148,0);
-          R.move(156,0);
+          L.move(150,0);
+          R.move(150,0);
           delay(300);
           L.stp();
           R.stp();
@@ -309,8 +309,8 @@ void loop()
           flipper_servo.write(1120);
           delay(100);
       
-          L.move(0,148);
-          R.move(0,156);
+          L.move(0,150);
+          R.move(0,150);
           delay(250);
           L.stp();
           R.stp();
