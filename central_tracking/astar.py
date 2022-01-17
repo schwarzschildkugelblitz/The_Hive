@@ -25,7 +25,7 @@ def astar(_grid, start, end, extra):
     # given grid
     grid = _grid
     # counts the number of iterations 
-    count = 0 
+    count = 0
     # Create start and end node
     start_node = Node(None, start)
     start_node.g = 0
@@ -109,7 +109,7 @@ def astar(_grid, start, end, extra):
                 if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (
                         curr.position[1] == last.position[1] and curr.position[0] != last.position[0])):
                     # check for right turn
-                    child.g = current_node.g + 9
+                    child.g = current_node.g + 8
                     child.h = ((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
                         pow(abs(child.position[1] - end_node.position[1]), 2)))
                     child.f += child.g + child.h
@@ -117,7 +117,7 @@ def astar(_grid, start, end, extra):
                 elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (
                         curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
                     # check for right turn
-                    child.g = current_node.g + 9
+                    child.g = current_node.g + 8
                     child.h = int(((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
                         pow(abs(child.position[1] - end_node.position[1]), 2))))
                     child.f += child.g + child.h
@@ -142,5 +142,6 @@ def astar(_grid, start, end, extra):
             # Add the child to the open list
             open_list.append(child)
             count += 1 
-            if count> 1000:
+            print(count)
+            if count> 1050:
                 raise Large_number_of_iterations(count)
