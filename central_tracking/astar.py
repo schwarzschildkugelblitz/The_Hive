@@ -4,6 +4,7 @@ class Large_number_of_iterations(Exception):
         self.error_message = error_message
         super().__init__(self.error_message)
 
+
 class Node:
     """A node class for A* Pathfinding"""
 
@@ -141,7 +142,7 @@ def astar(_grid, start, end, extra):
 
             # Add the child to the open list
             open_list.append(child)
-            count += 1 
-            print(count)
-            if count> 1050:
+            count += 1
+            # print(count)
+            if count > 1050:
                 raise Large_number_of_iterations(count)

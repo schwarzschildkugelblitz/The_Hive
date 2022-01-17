@@ -114,12 +114,12 @@ arena = [[-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0],
          [-1, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 4, 4, 0, 0, 5, 5, 0, 0, 6, 6, 0, 0],
          [-1, 0, 0, 4, 4, 0, 0, 5, 5, 0, 0, 6, 6, 0, 0],
-         [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [-1, 0, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [ 0, 0, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 7, 7, 0, 0, 8, 8, 0, 0, 9, 9, 0, 0],
          [-1, 0, 0, 7, 7, 0, 0, 8, 8, 0, 0, 9, 9, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -389,11 +389,30 @@ class PathFinder:
         return self.convert_to_space(path_1[:-1] + path_2), get_align_command(bot_vector, path_1[:2]) + turns_1 + [
             '180'] + turns_2 + get_drop_align(path_2[-2:], path_vectors)
 
-    def set_blocks(self, blocks):
+    def get_alternate_path(self, target, location, bot_top_left, bot_bottom_left):
+        location = (location[1] // self.scale, location[0] // self.scale)
+        target = (target[1] // self.scale, target[0] // self.scale)
+        path = astar(arena, location, target, None)
 
-        for block in blocks:
-            arena[block[1] // self.scale][block[0] // self.scale] = -3
-            self.new_blocks.append([block[1] // self.scale, block[0] // self.scale])
+        path = get_turns_only(path)
+        turns = get_turns(path)
+
+        bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
+        return self.convert_to_space(path), get_align_command(bot_vector, path[:2]) + turns  + ['stop']
+
+    def set_block(self, block):
+        block = [int(block[0]), int(block[1])]
+        # TODO Check whether it should be -1 or -3
+        # arena[block[1] // self.scale][block[0] // self.scale] = -1          # -3
+        # self.new_blocks.append([block[1] // self.scale, block[0] // self.scale])
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                try:
+                    if arena[block[1] // self.scale + i][block[0] // self.scale + j] == 0:
+                        arena[block[1] // self.scale + i][block[0] // self.scale + j] = -1  # -3
+                        self.new_blocks.append([block[1] // self.scale + i, block[0] // self.scale + j])
+                except IndexError:
+                    continue
 
     def reset_arena(self):
 

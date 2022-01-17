@@ -89,7 +89,7 @@ class ControlSystem:
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
-                if bot.id == 0:  # or bot.id == 1:
+                if bot.id == 0 or bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     bot.path_color = colors[locations[job[2]]]
@@ -105,7 +105,7 @@ class ControlSystem:
             bot.blocked = False
             bot.set_angle()
 
-        for bot in self.bots[self.bot_group:self.bot_group + 1]:
+        for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
             if time.time() - bot.command_start < bot.command_delay:
                 bot.idle = False
@@ -123,14 +123,25 @@ class ControlSystem:
                 self.integrator_state[bot.id] = 0.0
                 self.filter_state[bot.id] = 0.0
 
+            if bot.blocked:
+                bot.command_start = time.time()
+                self.integrator_state[bot.id] = 0.0
+                self.filter_state[bot.id] = 0.0
+                speed, bot.command_delay = special_command('stop')
+
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
-                    if bot.check_collision(self.bots[high_priority_bot_id]) or bot.blocked:
-                        # TODO call pathfinding and get new path with high_priority robot as obstacle
-                        bot.command_start = time.time()
-                        self.integrator_state[bot.id] = 0.0
-                        self.filter_state[bot.id] = 0.0
-                        speed, bot.command_delay = special_command('stop')
+                    if bot.check_collision(self.bots[high_priority_bot_id]):
+                        pass
+                        # self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
+                        # extra_path, extra_steps = self.path_finder.get_alternate_path(bot.path[bot.step], bot.coords,
+                        #                                                               bot.marker[0], bot.marker[3])
+                        # # print(bot.commands, extra_steps, sep='\n\n', end='\n\n')
+                        # np.insert(bot.path, bot.step, extra_path, axis=0)
+                        # bot.commands = bot.commands[:bot.step] + extra_steps + bot.commands[bot.step:]
+                        # self.path_finder.reset_arena()
+                        # # print(bot.commands)
+                        # # raise Exception("Executed Error")
 
             speed_data = int(4 * abs(speed) + bot.id)
             speed_sign = 1 if speed < 0 else 0
@@ -184,7 +195,7 @@ class ControlSystem:
 
     def draw_packages(self, video_feed):
         for bot in self.bots:
-            if bot.id == 0:  # or bot.id == 1:
+            if bot.id == 0 or bot.id == 1:
                 for i in range(len(bot.path) - 1):
                     cv2.line(video_feed, bot.path[i], bot.path[i + 1], bot.path_color[::-1], 4)
                 if any(bot.coords != np.zeros(2)):

@@ -26,8 +26,7 @@ The width and height of final processed window is to be d
 determined manually as it is a function of required/available
 resolution of camera and absolute width and height of arena
 """
-# width, height = int(44*800/34.5), int(24*800/34.5)
-# width, height = 600, 300
+
 width, height = 750, 700
 extra_height = 10
 
