@@ -1,3 +1,9 @@
+class Large_number_of_iterations(Exception):
+    def __init__(self, count, error_message="too time consuming case"):
+        self.count = count
+        self.error_message = error_message
+        super().__init__(self.error_message)
+
 class Node:
     """A node class for A* Pathfinding"""
 
@@ -18,7 +24,8 @@ def astar(_grid, start, end, extra):
 
     # given grid
     grid = _grid
-
+    # counts the number of iterations 
+    count = 0 
     # Create start and end node
     start_node = Node(None, start)
     start_node.g = 0
@@ -134,3 +141,6 @@ def astar(_grid, start, end, extra):
 
             # Add the child to the open list
             open_list.append(child)
+            count += 1 
+            if count> 1000:
+                raise Large_number_of_iterations(count)
