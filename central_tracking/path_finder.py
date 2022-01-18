@@ -264,7 +264,7 @@ class PathFinder:
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
                             # print('\nNodes:', self.points_to_visit)
-                            self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1], None)
+                            # self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1], None)
                             self.line_path = gen_path(arena,self.points_to_visit[0], self.points_to_visit[1], self.rows, self.cols)
                             # print('Path:', self.path)
 
