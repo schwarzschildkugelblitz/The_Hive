@@ -95,11 +95,14 @@ class ControlSystem:
                     bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     bot.path_color = colors[locations[job[2]]]
-                    print(bot.path, bot.commands, sep='\n')
+                    # print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
 
             if bot.next_target is not None:
                 self.priority.append(bot.id)
+            else:
+                bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
+                                                                   bot.marker[0], bot.marker[3])
 
             bot.blocked = False
             bot.set_angle()
