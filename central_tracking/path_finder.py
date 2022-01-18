@@ -153,7 +153,6 @@ def get_align_command(bot_vector, path_vectors):
 
 
 def get_turns_only(path):
-    # print('Full Path:',path)
     out = [path[0]]
     i = 0
     j = 1
@@ -209,6 +208,11 @@ def get_distance(path):
         dist += ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
     return dist
 
+def get_induction_distance(induction,location):
+    a = [location[0]//self.scale,location[1]//self.scale]
+    b = locations_coords[induction]
+
+    return [abs(a[0]-b[0]) + abs(a[1]-b[1])]
 
 class PathFinder:
     def __init__(self, w, h):
@@ -259,14 +263,10 @@ class PathFinder:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:  # Find Path Button or Reset
                         x, y = pygame.mouse.get_pos()
-                        print('(', y // self.scale, ',', x // self.scale, ')')
                         if self.calculate_button_coord[0] <= x <= self.calculate_button_coord[0] + self.scale and \
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
-                            # print('\nNodes:', self.points_to_visit)
-                            # self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1], None)
                             self.line_path = gen_path(arena,self.points_to_visit[0], self.points_to_visit[1], self.rows, self.cols)
-                            # print('Path:', self.path)
 
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
                                 self.reset_button_coord[1] <= y <= self.reset_button_coord[1] + self.scale:
@@ -280,8 +280,6 @@ class PathFinder:
                             self.path = []
                             self.line_path = []
 
-                            # print("Nodes after Reset:", self.points_to_visit)
-                            # print("Path after Reset:", self.path)
                     if event.button == 2: #set Blocks:
                         self.set_block(pygame.mouse.get_pos())
 
@@ -290,18 +288,26 @@ class PathFinder:
             for i in range(self.rows):
                 for j in range(self.cols):
                     color = colors[arena[i][j]]
-                    pygame.draw.rect(game_display, color, pygame.Rect(j * self.scale, i * self.scale,
+                    if arena[i][j] != 0:
+                        pygame.draw.rect(game_display, color, pygame.Rect(j * self.scale, i * self.scale,
                                                                       self.scale, self.scale))
                     pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(j * self.scale, i * self.scale,
                                                                           self.scale, self.scale), 2)
-            # Draw Path
-            for cell in self.path:
-                pygame.draw.rect(game_display, (4, 255, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale))
-            for cell in self.points_to_visit:
-                pygame.draw.rect(game_display, (102, 6, 43), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
-                                                                      self.scale, self.scale))
-
+            for i in range(2):
+                if len(self.points_to_visit) > 0:
+                    try:
+                        cell = self.points_to_visit[i]
+                        if i == 0:
+                            cell_color = (0,255,0)
+                        else:
+                            cell_color = (255,0,0)
+                        pygame.draw.rect(game_display,cell_color, pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                              self.scale, self.scale))
+                        pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                                                                              self.scale, self.scale), 2)
+                    except:
+                        pass
+                        
             # Calculate Path Button
             x, y = pygame.mouse.get_pos()
             if self.calculate_button_coord[0] <= x <= self.calculate_button_coord[0] + self.scale and \
@@ -309,6 +315,7 @@ class PathFinder:
                 color = (0, 255, 0)
             else:
                 color = (224, 189, 139)
+
             textobj = set_text('O', self.calculate_button_coord[0] + self.scale // 2,
                                self.calculate_button_coord[1] + self.scale // 2, 50)
             pygame.draw.rect(game_display, color,
@@ -351,83 +358,62 @@ class PathFinder:
         pygame.quit()
         quit()
 
-    def get_path(self, induction, target, location, bot_top_left, bot_bottom_left):
 
-        paths = []
-        all_turns = []
-        bot_coords = [location[1] // self.scale, location[0] // self.scale]
-        start = locations_coords[induction]
-        min_turns = float('inf')
-        min_dist = float('inf')
-        min_ind = 0
-        turn_ind_list = []
-        for i in range(1, 9):
-            end = locations_coords[target + str(i)]
-            path = astar(arena, start, end, None)
-            path = get_turns_only(path)
-            turns = get_turns(path)
-            paths.append(path)
-            all_turns.append(turns)
-
-            turn_ind_list.append([i - 1, len(turns)])
-
-        for ind in turn_ind_list:
-            if ind[1] < min_turns:
-                min_turns = ind[1]
-
-        for i in range(len(turn_ind_list)):
-            if turn_ind_list[i][1] == min_turns:
-                distance = get_distance(paths[turn_ind_list[i][0]])
-                if distance < min_dist:
-                    min_dist = distance
-                    min_ind = turn_ind_list[i][0]
-
-        # Path from bot to induction
-        path_1 = get_turns_only(astar(arena, bot_coords, locations_coords[induction], None))
-        turns_1 = get_turns(path_1)
-
-        # Path from induction to location
-        path_2 = paths[min_ind]
-        turns_2 = all_turns[min_ind]
-
-        final_cell = path_2[-1]
-
-        row = final_cell[0]
-        col = final_cell[1]
-
-        if arena[row + 1][col] != 0:
-            path_vectors = [[row, col], [row + 1, col]]
-
-        elif arena[row - 1][col] != 0:
-            path_vectors = [[row, col], [row - 1, col]]
-
-        elif arena[row][col + 1] != 0:
-            path_vectors = [[row, col], [row, col + 1]]
-
-        else:
-            path_vectors = [[row, col], [row, col - 1]]
+    def get_path(self, target, location, bot_top_left, bot_bottom_left):
         bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
-        return self.convert_to_space(path_1[:-1] + path_2), get_align_command(bot_vector, path_1[:2]) + turns_1 + [
-            '180'] + turns_2 + get_drop_align(path_2[-2:], path_vectors)
+        start = [location[1]//self.scale, location[0]//self.scale]
+        if target == '1' or target == '2':
+            end = locations_coords[target]
+        else:
+            min_dist = float('inf')
+            min_ind = -1
+            paths = []
+            path_found = False
+            for i in range(1,9):
+                cur_path = gen_path(arena,start,locations_coords[target + str(i)],self.rows,self.cols)
+                if cur_path is None:
+                    paths.append(None)
+                    continue
+                path_found = True
+                cur_dist = get_distance(cur_path)
+                paths.append(cur_path)
 
-    def get_alternate_path(self, target, location, bot_top_left, bot_bottom_left):
-        location = (location[1] // self.scale, location[0] // self.scale)
-        target = (target[1] // self.scale, target[0] // self.scale)
-        try:
-            path = astar(arena, location, target, None)
-            print("Here 2", path)
-        except Large_number_of_iterations:
-            print("Here 1")
-            return None, None
+                if cur_dist < min_dist:
+                    min_dist = cur_dist
+                    min_ind = i-1
+            if not path_found:
+                return None, None
+            path = paths[min_ind]
+            turns = get_turns(path)
 
+            final_cell = path[-1]
+            row = final_cell[0]
+            col = final_cell[1]
+
+            if arena[row + 1][col] != 0:
+                path_vectors = [[row, col], [row + 1, col]]
+
+            elif arena[row - 1][col] != 0:
+                path_vectors = [[row, col], [row - 1, col]]
+
+            elif arena[row][col + 1] != 0:
+                path_vectors = [[row, col], [row, col + 1]]
+
+            else:
+                path_vectors = [[row, col], [row, col - 1]]
+
+            align_command = get_align_command(bot_vector, path[:2])
+            drop_command = get_drop_align(path[-2:],path_vectors)
+
+            return self.convert_to_space(path),align_command + turns + drop_command
+
+        path = gen_path(arena,start,end,self.rows,self.cols)
         if path is None:
             return None, None
-
-        path = get_turns_only(path)
         turns = get_turns(path)
+        align_command = get_align_command(bot_vector, path[:2])
 
-        bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
-        return self.convert_to_space(path), get_align_command(bot_vector, path[:2]) + turns  + ['stop']
+        return self.convert_to_space(path), align_command + turns
 
     def set_block(self, block):
         block_x = int(block[0]//self.scale - 1) if block[0]//self.scale%2==0 else int(block[0]//self.scale)
