@@ -5,6 +5,7 @@ import numpy as np
 import pygame
 from math import atan2, degrees
 from astar import astar, Large_number_of_iterations
+from path_gen import gen_path
 
 locations = {
     'Mumbai': 1,
@@ -97,6 +98,7 @@ locations_coords = {
 }
 
 colors = {
+    -3: (77, 53, 51), # Custom Blocks
     -2: (158, 0, 69),  # Node to Visit
     -1: (0, 0, 0),  # Blocked Cell
     0: (255, 255, 255),  # Empty Cell
@@ -221,6 +223,7 @@ class PathFinder:
         self.reset_button_coord = (11 * self.scale, self.rows * self.scale)
         self.path = []
         self.new_blocks = []
+        self.line_path = []
 
     def draw_path(self):
         pygame.init()
@@ -262,6 +265,7 @@ class PathFinder:
                                 self.calculate_path:
                             # print('\nNodes:', self.points_to_visit)
                             self.path = astar(arena, self.points_to_visit[0], self.points_to_visit[1], None)
+                            self.line_path = gen_path(arena,self.points_to_visit[0], self.points_to_visit[1], self.rows, self.cols)
                             # print('Path:', self.path)
 
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
@@ -269,11 +273,18 @@ class PathFinder:
                             self.calculate_path = False
                             for point in self.points_to_visit:
                                 arena[point[0]][point[1]] = 0
+                            for point in self.new_blocks:
+                                arena[point[0]][point[1]] = 0
                             self.points_to_visit = []
+                            self.new_blocks = []
                             self.path = []
+                            self.line_path = []
 
                             # print("Nodes after Reset:", self.points_to_visit)
                             # print("Path after Reset:", self.path)
+                    if event.button == 2: #set Blocks:
+                        self.set_block(pygame.mouse.get_pos())
+
 
             game_display.fill((255, 255, 255))
             for i in range(self.rows):
@@ -285,10 +296,10 @@ class PathFinder:
                                                                           self.scale, self.scale), 2)
             # Draw Path
             for cell in self.path:
-                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                pygame.draw.rect(game_display, (4, 255, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
             for cell in self.points_to_visit:
-                pygame.draw.rect(game_display, (0, 0, 0), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
+                pygame.draw.rect(game_display, (102, 6, 43), pygame.Rect(cell[1] * self.scale, cell[0] * self.scale,
                                                                       self.scale, self.scale))
 
             # Calculate Path Button
@@ -315,6 +326,16 @@ class PathFinder:
                 color = (255, 0, 0)
             else:
                 color = (224, 189, 139)
+
+
+            # Line Path Render
+            for i in range(len(self.line_path)-1):
+                cell_1 = self.line_path[i]
+                cell_2 = self.line_path[i+1]
+                y1,x1 = cell_1[0]*self.scale + self.scale//2, cell_1[1]*self.scale + self.scale//2
+                y2,x2 = cell_2[0]*self.scale + self.scale//2, cell_2[1]*self.scale + self.scale//2
+                pygame.draw.line(game_display,(0,0,0),[x1,y1],[x2,y2],3)
+
             textobj = set_text('X', self.reset_button_coord[0] + self.scale // 2,
                                self.reset_button_coord[1] + self.scale // 2, 50)
             pygame.draw.rect(game_display, color,
@@ -409,16 +430,15 @@ class PathFinder:
         return self.convert_to_space(path), get_align_command(bot_vector, path[:2]) + turns  + ['stop']
 
     def set_block(self, block):
-        block = [int(block[0]), int(block[1])]
-        # TODO Check whether it should be -1 or -3
-        # arena[block[1] // self.scale][block[0] // self.scale] = -1          # -3
-        # self.new_blocks.append([block[1] // self.scale, block[0] // self.scale])
-        for i in range(-1, 2):
-            for j in range(-1, 2):
+        block_x = int(block[0]//self.scale - 1) if block[0]//self.scale%2==0 else int(block[0]//self.scale)
+        block = [block_x, (int(block[1]) // (self.scale*2))*2]
+        print("ID 1", block)
+        for i in range(0, 2):
+            for j in range(0, 2):
                 try:
-                    if arena[block[1] // self.scale + i][block[0] // self.scale + j] == 0:
-                        arena[block[1] // self.scale + i][block[0] // self.scale + j] = -1  # -3
-                        self.new_blocks.append([block[1] // self.scale + i, block[0] // self.scale + j])
+                    if arena[block[1] + i][block[0]+ j] == 0:
+                        arena[block[1]+ i][block[0]+ j] = -3
+                        self.new_blocks.append([block[1] + i, block[0] + j])
                 except IndexError:
                     continue
 

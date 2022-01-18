@@ -105,12 +105,15 @@ def astar(_grid, start, end, extra):
             curr = current_node
             last = child
 
+            cost = 0
+            no_turn_cost = 0 
+
             if first is not None:
                 # check to minimize turning by changing heuritic measurement
                 if ((first.position[0] == curr.position[0] and first.position[1] != curr.position[1]) and (
                         curr.position[1] == last.position[1] and curr.position[0] != last.position[0])):
                     # check for right turn
-                    child.g = current_node.g + 8
+                    child.g = current_node.g + cost
                     child.h = ((pow(abs(child.position[0] - end_node.position[0]), 2)) + (
                         pow(abs(child.position[1] - end_node.position[1]), 2)))
                     child.f += child.g + child.h
@@ -118,13 +121,13 @@ def astar(_grid, start, end, extra):
                 elif ((first.position[0] != curr.position[0] and first.position[1] == curr.position[1]) and (
                         curr.position[0] == last.position[0] and curr.position[1] != last.position[0])):
                     # check for right turn
-                    child.g = current_node.g + 8
+                    child.g = current_node.g + cost
                     child.h = (pow(abs(child.position[0] - end_node.position[0]), 2)) + (
                         pow(abs(child.position[1] - end_node.position[1]), 2))
                     child.f += child.g + child.h
                 else:
                     # no turn condition
-                    child.g = current_node.g + 1
+                    child.g = current_node.g + no_turn_cost
                     child.h = (pow(abs(child.position[0] - end_node.position[0]), 2)) + (
                         pow(abs(child.position[1] - end_node.position[1]), 2))
                     child.f += child.g + child.h
@@ -145,5 +148,5 @@ def astar(_grid, start, end, extra):
 
             count += 1
             # print(count)
-            if count > 2000:
+            if count > 3000:
                 raise Large_number_of_iterations(count)
