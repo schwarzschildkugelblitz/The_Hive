@@ -94,10 +94,6 @@ def gen_path(_grid,start,end,rows,cols):
     start_vertical = get_vertical_line(start,rows,_grid)
     end_vertical = get_vertical_line(end,rows,_grid)
 
-    print("SV",start_vertical.end_a,start_vertical.end_b)
-    print("EV",end_vertical.end_a,end_vertical.end_b)
-
-
     start_horizontal = get_horizontal_line(start,cols,_grid)
     end_horizontal = get_horizontal_line(end,cols,_grid)
 
@@ -108,14 +104,12 @@ def gen_path(_grid,start,end,rows,cols):
     exists, common_point = start_vertical.get_intersection(end_horizontal)
 
     if exists:
-        print("Case 1")
         return [start, common_point, end]
 
     # Case 2 Horizontal for Start and Vertical for End
     exists, common_point = start_horizontal.get_intersection(end_vertical)
 
     if exists:
-        print("Case 2")
         return [start, common_point, end]
 
 
@@ -142,7 +136,6 @@ def gen_path(_grid,start,end,rows,cols):
             if row_and_deviation[1] < min_dev:
                 min_row = row_and_deviation[0]
                 min_dev = row_and_deviation[1]
-        print("Case 3")
         return [start, [min_row,start[1]], [min_row,end[1]], end]
 
     # Case 4 Horizontal for Start and Horizontal for End
@@ -169,7 +162,7 @@ def gen_path(_grid,start,end,rows,cols):
                 min_col = col_and_deviation[0]
                 min_dev = col_and_deviation[1]
 
-        print("Case 4")
         return [start, [start[0],min_col], [end[0],min_col], end]
 
-    raise Exception("Not a 1 or 2 turn Path")
+    # raise Exception("Not a 1 or 2 turn Path")
+    return None
