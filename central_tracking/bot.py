@@ -26,6 +26,9 @@ class Bot:
         self.angle = 0
 
         self.blocked = False
+        self.transition = None
+        self.target = None
+        self.next_target = None
         self.command_start = time.time()
         self.command_delay = 0
 
@@ -52,7 +55,11 @@ class Bot:
 
         if self.step >= len(self.path):
             self.step = 0
-            self.idle = True
+            if self.next_target is None:
+                self.idle = True
+            else:
+                self.target = self.next_target
+                self.next_target = None
 
         return command
 

@@ -415,9 +415,7 @@ class PathFinder:
         target = (target[1] // self.scale, target[0] // self.scale)
         try:
             path = astar(arena, location, target, None)
-            print("Here 2", path)
         except Large_number_of_iterations:
-            print("Here 1")
             return None, None
 
         if path is None:
@@ -427,7 +425,7 @@ class PathFinder:
         turns = get_turns(path)
 
         bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
-        return self.convert_to_space(path), get_align_command(bot_vector, path[:2]) + turns  + ['stop']
+        return self.convert_to_space(path), get_align_command(bot_vector, path[:2]) + turns + ['stop']
 
     def set_block(self, block):
         block_x = int(block[0]//self.scale - 1) if block[0]//self.scale%2==0 else int(block[0]//self.scale)
