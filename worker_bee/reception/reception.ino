@@ -15,9 +15,9 @@ dependies
 #include <SPI.h>  // SPI library 
 #include <RH_NRF24.h> //NRF library 
 
-#define Worker_bee_Address 0
-#define LEFT 107 // speed of left motor
-#define RIGHT 111 // speed of right motor
+#define Worker_bee_Address 1
+#define LEFT 100 // speed of left motor
+#define RIGHT 103 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288
@@ -144,10 +144,10 @@ void loop()
         
       unpack(buf);
 //
-//      Serial.print(" -> ");
-//      Serial.print(add);
-//      Serial.print(" ");
-//      Serial.println(spd1);
+      Serial.print(" -> ");
+      Serial.print(add);
+      Serial.print(" ");
+      Serial.println(spd1);
                  
       if(add == Worker_bee_Address) // do anything only if the address matches
       {
@@ -206,7 +206,7 @@ void loop()
             delay(100);
             L.move(150,0);
             R.move(0,150);
-            delay(365);
+            delay(380);
             L.move(0,150);
             R.move(150,0);
             delay(20);
@@ -229,7 +229,7 @@ void loop()
           delay(100);
           L.move(150,0);
           R.move(0,150);
-          delay(365);
+          delay(380);
           L.move(0,150);
           R.move(150,0);
           delay(20);
@@ -325,7 +325,7 @@ void loop()
           delay(600);
           L.move(150,0);
           R.move(0,150);
-          delay(540);
+          delay(600);
           L.move(0,200);
           R.move(200,0);
           delay(30);
@@ -335,7 +335,7 @@ void loop()
           delay(20);
           L.move(0,150);
           R.move(0,150);
-          delay(600);
+          delay(550);
           L.stp();
           R.stp();
         }

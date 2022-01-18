@@ -145,5 +145,5 @@ def astar(_grid, start, end, extra):
 
             count += 1
             # print(count)
-            if count > 1050:
+            if count > 2000:
                 raise Large_number_of_iterations(count)

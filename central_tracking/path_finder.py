@@ -4,7 +4,7 @@ as part of hive round 2 """
 import numpy as np
 import pygame
 from math import atan2, degrees
-from astar import astar
+from astar import astar, Large_number_of_iterations
 
 locations = {
     'Mumbai': 1,
@@ -118,8 +118,8 @@ arena = [[-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 4, 4, 0, 0, 5, 5, 0, 0, 6, 6, 0, 0],
          [-1, 0, 0, 4, 4, 0, 0, 5, 5, 0, 0, 6, 6, 0, 0],
-         [-1, 0, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [ 0, 0, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 7, 7, 0, 0, 8, 8, 0, 0, 9, 9, 0, 0],
          [-1, 0, 0, 7, 7, 0, 0, 8, 8, 0, 0, 9, 9, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -392,7 +392,15 @@ class PathFinder:
     def get_alternate_path(self, target, location, bot_top_left, bot_bottom_left):
         location = (location[1] // self.scale, location[0] // self.scale)
         target = (target[1] // self.scale, target[0] // self.scale)
-        path = astar(arena, location, target, None)
+        try:
+            path = astar(arena, location, target, None)
+            print("Here 2", path)
+        except Large_number_of_iterations:
+            print("Here 1")
+            return None, None
+
+        if path is None:
+            return None, None
 
         path = get_turns_only(path)
         turns = get_turns(path)

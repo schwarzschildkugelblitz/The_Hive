@@ -9,7 +9,7 @@ from path_finder import PathFinder, locations, colors
 robots = [4, 5, 6, 7]  # marker labels of robots
 
 # proximity threshold to the target coordinate of path
-threshold = 40
+threshold = 25
 
 
 def special_command(bot_command):
@@ -46,9 +46,9 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.0071 / 30
-        self.Ki = 3.1364 / 30
-        self.Kd = 0.14 / 30
+        self.Kp = 0.0071 / 50
+        self.Ki = 3.1364 / 50
+        self.Kd = 0.14 / 50
         self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
@@ -90,6 +90,7 @@ class ControlSystem:
                 job = next(self.job)
                 bot.payload = job[0]
                 if bot.id == 0 or bot.id == 1:
+                    print("currently doing bot ", bot.id)
                     bot.path, bot.commands = self.path_finder.get_path(job[1], job[2], bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     bot.path_color = colors[locations[job[2]]]
@@ -132,16 +133,19 @@ class ControlSystem:
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
-                        pass
-                        # self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
-                        # extra_path, extra_steps = self.path_finder.get_alternate_path(bot.path[bot.step], bot.coords,
-                        #                                                               bot.marker[0], bot.marker[3])
-                        # # print(bot.commands, extra_steps, sep='\n\n', end='\n\n')
-                        # np.insert(bot.path, bot.step, extra_path, axis=0)
-                        # bot.commands = bot.commands[:bot.step] + extra_steps + bot.commands[bot.step:]
-                        # self.path_finder.reset_arena()
-                        # # print(bot.commands)
-                        # # raise Exception("Executed Error")
+                        self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
+                        extra_path, extra_steps = self.path_finder.get_alternate_path(bot.path[bot.step], bot.coords,
+                                                                                      bot.marker[0], bot.marker[3])
+
+                        if extra_path is None:
+                            bot.blocked = True
+                            continue
+                        # print(bot.commands, extra_steps, sep='\n\n', end='\n\n')
+                        np.insert(bot.path, bot.step, extra_path, axis=0)
+                        bot.commands = bot.commands[:bot.step] + extra_steps + bot.commands[bot.step:]
+                        self.path_finder.reset_arena()
+                        # print(bot.commands)
+                        # raise Exception("Executed Error")
 
             speed_data = int(4 * abs(speed) + bot.id)
             speed_sign = 1 if speed < 0 else 0
