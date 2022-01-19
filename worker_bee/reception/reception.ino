@@ -16,8 +16,8 @@ dependies
 #include <RH_NRF24.h> //NRF library 
 
 #define Worker_bee_Address 1
-#define LEFT 100 // speed of left motor
-#define RIGHT 103 // speed of right motor
+#define LEFT 98 // speed of left motor
+#define RIGHT 104 // speed of right motor
 #define tau 0.00016
 #define a 0.0017
 #define b 0.00000288

@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-collision_threshold = 150
+collision_threshold = 225
 
 
 def distance(p1, p2):
@@ -26,7 +26,7 @@ class Bot:
         self.angle = 0
 
         self.blocked = False
-        self.transition = None
+        self.transition = False
         self.target = None
         self.next_target = None
         self.command_start = time.time()
@@ -60,6 +60,7 @@ class Bot:
             else:
                 self.target = self.next_target
                 self.next_target = None
+                self.transition = True
 
         return command
 

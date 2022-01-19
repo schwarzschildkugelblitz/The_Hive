@@ -4,7 +4,7 @@ import time
 
 from bot import Bot
 from fetch_job import job_generator
-from path_finder import PathFinder, locations, colors, get_induction_distance
+from path_finder import PathFinder, locations, colors
 
 robots = [4, 5, 6, 7]  # marker labels of robots
 
@@ -97,20 +97,30 @@ class ControlSystem:
                     bot.path_color = colors[locations[job[2]]]
                     # print(bot.path, bot.commands, sep='\n')
                 bot.idle = False
+                if bot.id == 0:
+                    print(bot.path, bot.commands, bot.target, bot.next_target)
 
             if bot.next_target is not None:
                 self.priority.append(bot.id)
-            else:
+
+            if bot.transition:
+                print("bot target 1: ", bot.target)
                 bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                    bot.marker[0], bot.marker[3])
+                bot.transition = False
+                if bot.id == 0:
+                    print(bot.path, bot.commands, bot.target, bot.next_target)
 
             bot.blocked = False
             bot.set_angle()
 
-        self.priority.sort(key=lambda bot: get_induction_distance(bot.target, bot.coords))
+        self.priority.sort(key=lambda bot_id: self.path_finder.get_induction_distance(self.bots[bot_id].target,
+                                                                                      self.bots[bot_id].coords))
         for bot in self.bots:
             if bot.id not in self.priority:
                 self.priority.append(bot.id)
+
+        self.priority = self.priority[::-1]
 
         for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
@@ -130,35 +140,31 @@ class ControlSystem:
                 self.integrator_state[bot.id] = 0.0
                 self.filter_state[bot.id] = 0.0
 
-            if bot.blocked:
-                bot.command_start = time.time()
-                self.integrator_state[bot.id] = 0.0
-                self.filter_state[bot.id] = 0.0
-                speed, bot.command_delay = special_command('stop')
 
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
                         self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
+                        print('bot target:', bot.target, "bot id:",bot.id)
                         new_path, new_commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                            bot.marker[0], bot.marker[3])
-
+                        print("ID NP:",new_path,new_commands)
                         if new_path is None:
                             bot.blocked = True
                             continue
 
                         bot.path, bot.commands = new_path, new_commands
 
+            if bot.blocked:
+                bot.command_start = time.time()
+                self.integrator_state[bot.id] = 0.0
+                self.filter_state[bot.id] = 0.0
+                speed, bot.command_delay = special_command('stop')
+
             speed_data = int(4 * abs(speed) + bot.id)
             speed_sign = 1 if speed < 0 else 0
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
-
-            if bot.id == 1:
-                try:
-                    print(bot.marker_id, speed, bot.path[bot.step])
-                except IndexError:
-                    print(bot.marker_id, speed, 'stop')
 
             if speed > 55:
                 self.signals.append(signal)

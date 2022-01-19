@@ -208,11 +208,6 @@ def get_distance(path):
         dist += ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
     return dist
 
-def get_induction_distance(induction,location):
-    a = [location[0]//self.scale,location[1]//self.scale]
-    b = locations_coords[induction]
-
-    return [abs(a[0]-b[0]) + abs(a[1]-b[1])]
 
 class PathFinder:
     def __init__(self, w, h):
@@ -267,7 +262,7 @@ class PathFinder:
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
                             self.line_path = gen_path(arena,self.points_to_visit[0], self.points_to_visit[1], self.rows, self.cols)
-
+                            print("Line Path:", self.line_path)
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
                                 self.reset_button_coord[1] <= y <= self.reset_button_coord[1] + self.scale:
                             self.calculate_path = False
@@ -361,7 +356,7 @@ class PathFinder:
 
     def get_path(self, target, location, bot_top_left, bot_bottom_left):
         bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
-        start = [location[1]//self.scale, location[0]//self.scale]
+        start = [int(location[1]//self.scale), int(location[0]//self.scale)]
         if target == '1' or target == '2':
             end = locations_coords[target]
         else:
@@ -382,6 +377,7 @@ class PathFinder:
                     min_dist = cur_dist
                     min_ind = i-1
             if not path_found:
+                print("inside get path")
                 return None, None
             path = paths[min_ind]
             turns = get_turns(path)
@@ -409,11 +405,12 @@ class PathFinder:
 
         path = gen_path(arena,start,end,self.rows,self.cols)
         if path is None:
+            print("Inudction None")
             return None, None
         turns = get_turns(path)
         align_command = get_align_command(bot_vector, path[:2])
 
-        return self.convert_to_space(path), align_command + turns
+        return self.convert_to_space(path), align_command + turns + ['stop']
 
     def set_block(self, block):
         block_x = int(block[0]//self.scale - 1) if block[0]//self.scale%2==0 else int(block[0]//self.scale)
@@ -433,6 +430,12 @@ class PathFinder:
         for block in self.new_blocks:
             arena[block[0]][block[1]] = 0
         self.new_blocks = []
+
+    def get_induction_distance(self, induction, location):
+        a = [location[0] // self.scale, location[1] // self.scale]
+        b = locations_coords[induction]
+
+        return [abs(a[0] - b[0]) + abs(a[1] - b[1])]
 
     def convert_to_space(self, points):
         space_points = []
