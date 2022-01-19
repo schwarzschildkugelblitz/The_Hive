@@ -32,7 +32,7 @@ class Bot:
         self.transition = False
         self.target = None
         self.next_target = None
-        self.command_start = time.time()
+        self.command_start = None
         self.command_delay = 0
 
         self.old_target = np.zeros(2)
@@ -65,15 +65,23 @@ class Bot:
         self.step += 1
 
         if self.step >= len(self.path):
-            self.step = 0
             if self.next_target is None:
-                self.idle = True
+                self.command_start = time.time()
+                # self.idle = True
             else:
+                self.step = 0
                 self.target = self.next_target
                 self.next_target = None
                 self.transition = True
 
         return command
+
+    def go_to_next(self):
+        if self.command_start is not None and time.time() - self.command_start > 3 and self.step >= len(self.path) and \
+                (not self.blocked):
+            self.command_start = None
+            self.step = 0
+            self.idle = True
 
     def set_center(self, ):
         """
@@ -111,7 +119,7 @@ class Bot:
         mag_a = distance(a0, a1) + 0.0001
         va = ((a1[1] - a0[1]) / mag_a, (a1[0] - a0[0]) / mag_a)
 
-        mag_b = distance(b0, b1)
+        mag_b = distance(b0, b1) + 0.0001
         vb = ((b1[1] - b0[1]) / mag_b, (b1[0] - b0[0]) / mag_b)
 
         angle = np.arccos(np.clip(np.dot(va, vb), -1.0, 1.0))

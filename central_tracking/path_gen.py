@@ -104,7 +104,8 @@ def gen_path(_grid,start,end,rows,cols):
     exists, common_point = start_vertical.get_intersection(end_horizontal)
 
     if exists:
-        if start == common_point or end == common_point:
+        if (start[0] == common_point[0] and start[1] == common_point[1]) or \
+                (end[0] == common_point[0] and end[1] == common_point[1]):
             return [start, end]
         return [start, common_point, end]
 
@@ -112,7 +113,8 @@ def gen_path(_grid,start,end,rows,cols):
     exists, common_point = start_horizontal.get_intersection(end_vertical)
 
     if exists:
-        if start == common_point or end == common_point:
+        if (start[0] == common_point[0] and start[1] == common_point[1]) or \
+                (end[0] == common_point[0] and end[1] == common_point[1]):
             return [start, end]
         return [start, common_point, end]
 

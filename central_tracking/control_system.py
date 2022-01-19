@@ -140,20 +140,22 @@ class ControlSystem:
 
         for bot in self.bots[self.bot_group:self.bot_group + 2]:
 
-            if time.time() - bot.command_start < bot.command_delay:
-                bot.idle = False
-                continue
-
             if bot.target_dist() < threshold or bot.step >= len(bot.commands):
                 try:
                     bot.old_target = bot.path[bot.step]
                 except IndexError:
                     bot.old_target = bot.path[-1]
 
-                bot.command_start = time.time()
+                # bot.command_start = time.time()
                 speed, bot.command_delay = special_command(bot.get_command())
             else:
                 speed = self.pid(bot)
+
+            bot.go_to_next()
+
+            # if time.time() - bot.command_start < bot.command_delay:
+            #     bot.idle = False
+            #     continue
 
             if bot.old_target_dist() < threshold:
                 self.integrator_state[bot.id] = 0.0
@@ -182,21 +184,22 @@ class ControlSystem:
                             bot.path, bot.commands = new_path, new_commands
 
             if bot.blocked:
-                bot.command_start = time.time()
+                # bot.command_start = time.time()
                 self.integrator_state[bot.id] = 0.0
                 self.filter_state[bot.id] = 0.0
                 speed, bot.command_delay = special_command('stop')
-
+            # if bot.id == 1:
+                # print("Speed:",speed)
             speed_data = int(4 * abs(speed) + bot.id)
             speed_sign = 1 if speed < 0 else 0
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
-            # if speed > 55:
-            #     self.signals.append(signal)
-            #     self.signals.append(signal)
-            #     self.signals.append(signal)
-            #     self.signals.append(signal)
+            if speed > 55:
+                self.signals.append(signal)
+                self.signals.append(signal)
+                # self.signals.append(signal)
+                # self.signals.append(signal)
 
             self.signals.append(signal)
 

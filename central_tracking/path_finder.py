@@ -141,7 +141,9 @@ def get_align_command(bot_vector, path_vectors):
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
     angle = degrees(angle)
-    # print(angle)
+    print("Angle:",angle)
+    print("Bot Vector:",bot_vector)
+    print("Direction:",direction)
 
     if abs(angle - 90) < angle_threshold:
         return ['left']
@@ -441,7 +443,7 @@ class PathFinder:
 
     def convert_to_space(self, points):
         space_points = []
-        off = 15
+        off = 10
         for point in points:
             x = point[1]
             y = point[0]
