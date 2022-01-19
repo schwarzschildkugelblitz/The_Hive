@@ -141,7 +141,7 @@ def get_align_command(bot_vector, path_vectors):
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
     angle = degrees(angle)
-    print(angle)
+    # print(angle)
 
     if abs(angle - 90) < angle_threshold:
         return ['left']
@@ -355,6 +355,7 @@ class PathFinder:
 
 
     def get_path(self, target, location, bot_top_left, bot_bottom_left):
+        print("Target: ",target,"Location:",location)
         bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
         start = [int(location[1]//self.scale), int(location[0]//self.scale)]
         if target == '1' or target == '2':
@@ -377,7 +378,8 @@ class PathFinder:
                     min_dist = cur_dist
                     min_ind = i-1
             if not path_found:
-                print("inside get path")
+                print("inside get path not found")
+                print(np.array(arena))
                 return None, None
             path = paths[min_ind]
             turns = get_turns(path)
@@ -405,7 +407,7 @@ class PathFinder:
 
         path = gen_path(arena,start,end,self.rows,self.cols)
         if path is None:
-            print("Inudction None")
+            print("Induction None")
             return None, None
         turns = get_turns(path)
         align_command = get_align_command(bot_vector, path[:2])
@@ -439,7 +441,7 @@ class PathFinder:
 
     def convert_to_space(self, points):
         space_points = []
-        off = 20
+        off = 15
         for point in points:
             x = point[1]
             y = point[0]

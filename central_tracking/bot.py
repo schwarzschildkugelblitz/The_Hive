@@ -15,8 +15,8 @@ class Bot:
     def __init__(self, bot_id, marker_id):
         self.id = bot_id
         self.marker_id = marker_id
-        self.marker = np.zeros((4, 2), dtype=np.float32)
-        self.coords = np.array([-200, -200], dtype=np.float32)
+        self.marker = None
+        self.coords = np.array([-1000, -1000], dtype=np.int32)
         self.idle = True
         self.payload = ""
 
@@ -26,6 +26,9 @@ class Bot:
         self.angle = 0
 
         self.blocked = False
+        self.blocked_by = None
+        self.blocking = None
+
         self.transition = False
         self.target = None
         self.next_target = None
@@ -40,10 +43,18 @@ class Bot:
 
     def check_collision(self, other_bot):
         dist = distance(self.coords, other_bot.coords)
-        if dist < collision_threshold:
-            if dist < collision_threshold/2:
-                other_bot.blocked = True
+        if dist < collision_threshold and not (other_bot.blocked_by == self.id):
+            other_bot.blocked = True
+            other_bot.blocked_by = self.id
+            self.blocking = other_bot.id
             return True
+
+        if dist > collision_threshold and other_bot.blocked_by == self.id:
+            other_bot.blocked = False
+            other_bot.blocked_by = None
+            self.blocking = None
+
+        return False
 
     def get_command(self):
         try:
@@ -69,9 +80,11 @@ class Bot:
         Returns skewed center of marker to match closely to the center of the robot
         Requires tuning (TODO)
         """
-
-        self.coords[0] = (self.marker[0][0] * 3 + self.marker[1][0] * 3 + self.marker[2][0] + self.marker[3][0]) // 8
-        self.coords[1] = (self.marker[0][1] * 3 + self.marker[1][1] * 3 + self.marker[2][1] + self.marker[3][1]) // 8
+        try:
+            self.coords[0] = (self.marker[0][0] * 3 + self.marker[1][0] * 3 + self.marker[2][0] + self.marker[3][0]) // 8
+            self.coords[1] = (self.marker[0][1] * 3 + self.marker[1][1] * 3 + self.marker[2][1] + self.marker[3][1]) // 8
+        except TypeError:
+            pass
 
     def set_angle(self, ):
         """
@@ -80,14 +93,20 @@ class Bot:
         A unit vector is created and angle is calculated using dot product
         Output type -> degrees
         """
-        a0 = self.marker[3]
-        a1 = self.marker[0]
-        b0 = self.coords
+        try:
+            a0 = self.marker[3]
+            a1 = self.marker[0]
+            b0 = self.coords
+        except TypeError:
+            a0, a1, b0 = [[0, 0]] * 3
         try:
             b1 = self.path[self.step]
         except IndexError:
             self.angle = 0.0
             return
+        # except TypeError:
+        #     self.angle = 0.0
+        #     return
 
         mag_a = distance(a0, a1) + 0.0001
         va = ((a1[1] - a0[1]) / mag_a, (a1[0] - a0[0]) / mag_a)

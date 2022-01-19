@@ -29,6 +29,23 @@ def special_command(bot_command):
     return commands[bot_command], delay[bot_command]
 
 
+def is_equal(arr_a, arr_b):
+    """
+    Function to compare equality of two arrays
+    containing vectors
+    """
+    if len(arr_a) != len(arr_b):
+        return False
+    else:
+        for i in range(len(arr_a)):
+            a = arr_a[i]
+            b = arr_b[i]
+
+            if a[0] != b[0] or a[1] != b[1]:
+                return False
+        return True
+
+
 class ControlSystem:
     """
     Manages all the commands to every robot
@@ -46,9 +63,9 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.0071 / 50
-        self.Ki = 3.1364 / 50
-        self.Kd = 0.14 / 50
+        self.Kp = 0.0071 / 30
+        self.Ki = 3.1364 / 30
+        self.Kd = 0.14 / 30
         self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
@@ -95,23 +112,22 @@ class ControlSystem:
                     bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     bot.path_color = colors[locations[job[2]]]
-                    # print(bot.path, bot.commands, sep='\n')
+
                 bot.idle = False
-                if bot.id == 0:
+                if bot.id == 1:
                     print(bot.path, bot.commands, bot.target, bot.next_target)
 
             if bot.next_target is not None:
                 self.priority.append(bot.id)
 
             if bot.transition:
-                print("bot target 1: ", bot.target)
                 bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                    bot.marker[0], bot.marker[3])
                 bot.transition = False
-                if bot.id == 0:
+                if bot.id == 1:
                     print(bot.path, bot.commands, bot.target, bot.next_target)
 
-            bot.blocked = False
+            # bot.blocked = False
             bot.set_angle()
 
         self.priority.sort(key=lambda bot_id: self.path_finder.get_induction_distance(self.bots[bot_id].target,
@@ -129,7 +145,10 @@ class ControlSystem:
                 continue
 
             if bot.target_dist() < threshold or bot.step >= len(bot.commands):
-                bot.old_target = bot.path[bot.step]
+                try:
+                    bot.old_target = bot.path[bot.step]
+                except IndexError:
+                    bot.old_target = bot.path[-1]
 
                 bot.command_start = time.time()
                 speed, bot.command_delay = special_command(bot.get_command())
@@ -140,20 +159,27 @@ class ControlSystem:
                 self.integrator_state[bot.id] = 0.0
                 self.filter_state[bot.id] = 0.0
 
-
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
+                        print(f"{bot.id} is colliding with {high_priority_bot_id} at {self.bots[high_priority_bot_id].coords}")
+                        # print(self.bots[high_priority_bot_id].coords)
                         self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
-                        print('bot target:', bot.target, "bot id:",bot.id)
                         new_path, new_commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                            bot.marker[0], bot.marker[3])
-                        print("ID NP:",new_path,new_commands)
+                        self.path_finder.reset_arena()
                         if new_path is None:
                             bot.blocked = True
+                            if bot.blocking is not None:
+                                self.bots[bot.blocking].blocked = False
+                                self.bots[bot.blocking].blocked_by = None
                             continue
+                        elif bot.blocked:
+                            bot.blocked = False
 
-                        bot.path, bot.commands = new_path, new_commands
+                        if not is_equal(new_path, bot.path):
+                            bot.step = 0
+                            bot.path, bot.commands = new_path, new_commands
 
             if bot.blocked:
                 bot.command_start = time.time()
@@ -166,11 +192,11 @@ class ControlSystem:
 
             signal = bytes(str(speed_data) + ' ' + str(speed_sign) + '\n', 'utf-8')
 
-            if speed > 55:
-                self.signals.append(signal)
-                self.signals.append(signal)
-                self.signals.append(signal)
-                self.signals.append(signal)
+            # if speed > 55:
+            #     self.signals.append(signal)
+            #     self.signals.append(signal)
+            #     self.signals.append(signal)
+            #     self.signals.append(signal)
 
             self.signals.append(signal)
 
