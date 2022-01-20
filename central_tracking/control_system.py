@@ -104,6 +104,9 @@ class ControlSystem:
 
             bot.set_center()
 
+            if time.time() - bot.command_start < bot.command_delay:
+                continue
+
             if bot.idle:
                 job = next(self.job)
                 bot.payload = job[0]
@@ -146,16 +149,10 @@ class ControlSystem:
                 except IndexError:
                     bot.old_target = bot.path[-1]
 
-                # bot.command_start = time.time()
+                bot.command_start = time.time()
                 speed, bot.command_delay = special_command(bot.get_command())
             else:
                 speed = self.pid(bot)
-
-            bot.go_to_next()
-
-            # if time.time() - bot.command_start < bot.command_delay:
-            #     bot.idle = False
-            #     continue
 
             if bot.old_target_dist() < threshold:
                 self.integrator_state[bot.id] = 0.0
@@ -164,7 +161,8 @@ class ControlSystem:
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
-                        print(f"{bot.id} is colliding with {high_priority_bot_id} at {self.bots[high_priority_bot_id].coords}")
+                        print(f"{bot.id} is colliding with {high_priority_bot_id} at " +
+                              f"{self.bots[high_priority_bot_id].coords}")
                         # print(self.bots[high_priority_bot_id].coords)
                         self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
                         new_path, new_commands = self.path_finder.get_path(bot.target, bot.coords,

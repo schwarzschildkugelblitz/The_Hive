@@ -32,7 +32,7 @@ class Bot:
         self.transition = False
         self.target = None
         self.next_target = None
-        self.command_start = None
+        self.command_start = time.time()
         self.command_delay = 0
 
         self.old_target = np.zeros(2)
@@ -65,34 +65,27 @@ class Bot:
         self.step += 1
 
         if self.step >= len(self.path):
+            self.step = 0
             if self.next_target is None:
-                self.command_start = time.time()
-                # self.idle = True
+                self.idle = True
             else:
-                self.step = 0
                 self.target = self.next_target
                 self.next_target = None
                 self.transition = True
 
         return command
 
-    def go_to_next(self):
-        if self.command_start is not None and time.time() - self.command_start > 3 and self.step >= len(self.path) and \
-                (not self.blocked):
-            self.command_start = None
-            self.step = 0
-            self.idle = True
-
     def set_center(self, ):
         """
         Returns skewed center of marker to match closely to the center of the robot
         Requires tuning (TODO)
         """
-        try:
-            self.coords[0] = (self.marker[0][0] * 3 + self.marker[1][0] * 3 + self.marker[2][0] + self.marker[3][0]) // 8
-            self.coords[1] = (self.marker[0][1] * 3 + self.marker[1][1] * 3 + self.marker[2][1] + self.marker[3][1]) // 8
-        except TypeError:
-            pass
+        if self.marker is None:
+            # Bot is not initialized / not visible
+            return
+
+        self.coords[0] = (self.marker[0][0] * 3 + self.marker[1][0] * 3 + self.marker[2][0] + self.marker[3][0]) // 8
+        self.coords[1] = (self.marker[0][1] * 3 + self.marker[1][1] * 3 + self.marker[2][1] + self.marker[3][1]) // 8
 
     def set_angle(self, ):
         """
