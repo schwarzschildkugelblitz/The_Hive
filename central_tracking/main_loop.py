@@ -37,7 +37,7 @@ control = ControlSystem(width, height)
 
 def send_signal(conn):
 
-    arduino = SerialCommunication("COM4", 115200)
+    arduino = SerialCommunication("COM11", 115200)
 
     while True:
         signals = conn.recv()

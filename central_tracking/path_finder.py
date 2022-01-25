@@ -31,6 +31,7 @@ locations_coords = {
     'Mumbai6': (4, 4),
     'Mumbai7': (2, 5),
     'Mumbai8': (3, 5),
+
     'Delhi1': (1, 7),
     'Delhi2': (1, 8),
     'Delhi3': (2, 9),
@@ -39,6 +40,7 @@ locations_coords = {
     'Delhi6': (4, 7),
     'Delhi7': (3, 6),
     'Delhi8': (2, 6),
+
     'Kolkata1': (1, 11),
     'Kolkata2': (1, 12),
     'Kolkata3': (2, 13),
@@ -47,6 +49,7 @@ locations_coords = {
     'Kolkata6': (4, 11),
     'Kolkata7': (3, 10),
     'Kolkata8': (2, 10),
+
     'Chennai1': (5, 3),
     'Chennai2': (5, 4),
     'Chennai3': (6, 5),
@@ -55,6 +58,7 @@ locations_coords = {
     'Chennai6': (8, 3),
     'Chennai7': (7, 2),
     'Chennai8': (6, 2),
+
     'Bengaluru1': (5, 7),
     'Bengaluru2': (5, 8),
     'Bengaluru3': (6, 9),
@@ -63,6 +67,7 @@ locations_coords = {
     'Bengaluru6': (8, 7),
     'Bengaluru7': (6, 6),
     'Bengaluru8': (7, 6),
+
     'Hyderabad1': (8, 12),
     'Hyderabad2': (5, 11),
     'Hyderabad3': (5, 12),
@@ -71,6 +76,7 @@ locations_coords = {
     'Hyderabad6': (8, 11),
     'Hyderabad7': (7, 10),
     'Hyderabad8': (6, 10),
+
     'Pune1': (9, 3),
     'Pune2': (9, 4),
     'Pune3': (10, 5),
@@ -79,6 +85,7 @@ locations_coords = {
     'Pune6': (12, 3),
     'Pune7': (11, 2),
     'Pune8': (10, 2),
+
     'Ahmedabad1': (9, 7),
     'Ahmedabad2': (9, 8),
     'Ahmedabad3': (10, 9),
@@ -87,6 +94,7 @@ locations_coords = {
     'Ahmedabad6': (12, 7),
     'Ahmedabad7': (11, 6),
     'Ahmedabad8': (10, 6),
+
     'Jaipur1': (9, 11),
     'Jaipur2': (9, 12),
     'Jaipur3': (10, 13),
@@ -141,9 +149,9 @@ def get_align_command(bot_vector, path_vectors):
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
     angle = degrees(angle)
-    print("Angle:",angle)
-    print("Bot Vector:",bot_vector)
-    print("Direction:",direction)
+    # print("Angle:",angle)
+    # print("Bot Vector:",bot_vector)
+    # print("Direction:",direction)
 
     if abs(angle - 90) < angle_threshold:
         return ['left']
@@ -264,7 +272,7 @@ class PathFinder:
                                 self.calculate_button_coord[1] <= y <= self.calculate_button_coord[1] + self.scale and \
                                 self.calculate_path:
                             self.line_path = gen_path(arena,self.points_to_visit[0], self.points_to_visit[1], self.rows, self.cols)
-                            print("Line Path:", self.line_path)
+                            # print("Line Path:", self.line_path)
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
                                 self.reset_button_coord[1] <= y <= self.reset_button_coord[1] + self.scale:
                             self.calculate_path = False
@@ -357,7 +365,7 @@ class PathFinder:
 
 
     def get_path(self, target, location, bot_top_left, bot_bottom_left):
-        print("Target: ",target,"Location:",location)
+        # print("Target: ",target,"Location:",location)
         bot_vector = [bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0]]
         start = [int(location[1]//self.scale), int(location[0]//self.scale)]
         if target == '1' or target == '2':
@@ -380,8 +388,8 @@ class PathFinder:
                     min_dist = cur_dist
                     min_ind = i-1
             if not path_found:
-                print("inside get path not found")
-                print(np.array(arena))
+                # print("inside get path not found")
+                # print(np.array(arena))
                 return None, None
             path = paths[min_ind]
             turns = get_turns(path)
@@ -405,21 +413,31 @@ class PathFinder:
             align_command = get_align_command(bot_vector, path[:2])
             drop_command = get_drop_align(path[-2:],path_vectors)
 
-            return self.convert_to_space(path),align_command + turns + drop_command
+            outurns = align_command + turns + drop_command
+
+            return self.convert_to_space(path,False,None),outurns
 
         path = gen_path(arena,start,end,self.rows,self.cols)
         if path is None:
-            print("Induction None")
+            # print("Induction None")
             return None, None
         turns = get_turns(path)
         align_command = get_align_command(bot_vector, path[:2])
 
-        return self.convert_to_space(path), align_command + turns + ['stop']
+        outurns = align_command + turns
+
+        if outurns[0] == '180' and outurns[1] == 'right':
+            outurns = ['left']
+            path = [path[0]] + [path[-1]]
+
+        return self.convert_to_space(path,True,target),outurns + ['stop']
+
+        # return self.convert_to_space(path,True,target), align_command + turns + ['stop']
 
     def set_block(self, block):
         block_x = int(block[0]//self.scale - 1) if block[0]//self.scale%2==0 else int(block[0]//self.scale)
         block = [block_x, (int(block[1]) // (self.scale*2))*2]
-        print("ID 1", block)
+        print("Inside Set Block:",block)
         for i in range(0, 2):
             for j in range(0, 2):
                 try:
@@ -428,6 +446,7 @@ class PathFinder:
                         self.new_blocks.append([block[1] + i, block[0] + j])
                 except IndexError:
                     continue
+        print("Block State:\n", np.array(arena,dtype=np.int32))
 
     def reset_arena(self):
 
@@ -435,35 +454,48 @@ class PathFinder:
             arena[block[0]][block[1]] = 0
         self.new_blocks = []
 
-    def get_induction_distance(self, induction, location):
-        a = [location[0] // self.scale, location[1] // self.scale]
-        b = locations_coords[induction]
+    def get_induction_distance(self, path):
+        dist = 0
+        for i in range(len(path) - 1):
+            x1, y1 = path[i]
+            x2, y2 = path[i + 1]
 
-        return [abs(a[0] - b[0]) + abs(a[1] - b[1])]
+            dist += ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
+        return dist
 
-    def convert_to_space(self, points):
+    def convert_to_space(self, points, to_induction, induction):
+        off = 25
         space_points = []
-        off = 10
+        
         for point in points:
             x = point[1]
             y = point[0]
             xoff, yoff = 0, 0
-            if x in [2, 6, 10, 0]:
+            if x == 0 and y == 4:
                 xoff = -off
-            if x in [5, 9, 13]:
-                xoff = off
-            if y in [1, 5, 9]:
-                if x > 1:
-                    yoff = -off
-            if y in [4, 8, 12]:
-                if x > 1:
-                    yoff = off
-            if x == 1:
-                xoff = off
+                # yoff = -off
+            else:    
+                if x % 2 == 0:
+                    xoff = - off
+                else:
+                    xoff = + off
 
+                if x > 1:
+                    if y % 2 == 0:
+                        yoff = + off
+                    else:
+                        yoff = - off
+                if x == 1:
+                    if y == 12:
+                        yoff = + off
+                    if y == 1:
+                        yoff = - off
+                    # if y == 4:
+                    #     yoff = - off
             x = point[1] * self.scale + self.scale // 2 + xoff
             y = point[0] * self.scale + self.scale // 2 + yoff
             space_points.append([x, y])
+
         return np.array(space_points, dtype=np.int32)
 
 

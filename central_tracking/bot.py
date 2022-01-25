@@ -28,6 +28,7 @@ class Bot:
         self.blocked = False
         self.blocked_by = None
         self.blocking = None
+        self.recalculate = None
 
         self.transition = False
         self.target = None

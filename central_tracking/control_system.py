@@ -9,7 +9,7 @@ from path_finder import PathFinder, locations, colors
 robots = [4, 5, 6, 7]  # marker labels of robots
 
 # proximity threshold to the target coordinate of path
-threshold = 25
+threshold = 40
 
 
 def special_command(bot_command):
@@ -24,7 +24,7 @@ def special_command(bot_command):
     """
 
     commands = {'left': 56, 'right': 57, 'stop': 58, 'right_drop': 59, 'left_drop': 60, 'drop': 61, '180': 62}  # speed
-    delay = {'left': 0.5, 'right': 0.5, 'stop': 0.5, 'right_drop': 3, 'left_drop': 3, 'drop': 2, '180': 2}  # delay
+    delay = {'left': 0.5, 'right': 0.5, 'stop': 0.5, 'right_drop': 2, 'left_drop': 2, 'drop': 1, '180': 1}  # delay
 
     return commands[bot_command], delay[bot_command]
 
@@ -63,9 +63,9 @@ class ControlSystem:
         # PID (feedback) system variables
         self.filter_state = np.zeros(4, dtype=np.float32)
         self.integrator_state = np.zeros(4, dtype=np.float32)
-        self.Kp = 0.0071 / 30
-        self.Ki = 3.1364 / 30
-        self.Kd = 0.14 / 30
+        self.Kp = 0.0071 / 40
+        self.Ki = 3.1364 / 40
+        self.Kd = 0.14 / 40
         self.N = 4.5
         self.priority = [0, 1, 2, 3]
 
@@ -111,37 +111,41 @@ class ControlSystem:
                 job = next(self.job)
                 bot.payload = job[0]
                 bot.target, bot.next_target = job[1], job[2]
-                if bot.id == 0 or bot.id == 1:
+                if bot.id == 0: # or bot.id == 1:
                     bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                        bot.marker[0], bot.marker[3])
                     bot.path_color = colors[locations[job[2]]]
-
+                    if len(bot.path) > 0: # Boom Rohan
+                        print(bot.id, bot.path, bot.commands, bot.target, bot.next_target)
                 bot.idle = False
-                if bot.id == 1:
-                    print(bot.path, bot.commands, bot.target, bot.next_target)
+                
+                # if bot.id == 1:
+                #     print(bot.path, bot.commands, bot.target, bot.next_target)
 
-            if bot.next_target is not None:
+            if bot.next_target is not None and bot.path is not None:
                 self.priority.append(bot.id)
 
             if bot.transition:
                 bot.path, bot.commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                    bot.marker[0], bot.marker[3])
                 bot.transition = False
-                if bot.id == 1:
-                    print(bot.path, bot.commands, bot.target, bot.next_target)
+                if bot.path is not None:
+                    print(bot.id, bot.path, bot.commands, bot.target, bot.next_target)
 
             # bot.blocked = False
             bot.set_angle()
 
-        self.priority.sort(key=lambda bot_id: self.path_finder.get_induction_distance(self.bots[bot_id].target,
-                                                                                      self.bots[bot_id].coords))
+        self.priority.sort(key=lambda bot_id: self.path_finder.get_induction_distance(self.bots[bot_id].path))
         for bot in self.bots:
             if bot.id not in self.priority:
                 self.priority.append(bot.id)
 
         self.priority = self.priority[::-1]
 
-        for bot in self.bots[self.bot_group:self.bot_group + 2]:
+        for bot in self.bots[self.bot_group:self.bot_group + 1]:
+
+            if time.time() - bot.command_start < bot.command_delay:
+                continue
 
             if bot.target_dist() < threshold or bot.step >= len(bot.commands):
                 try:
@@ -161,9 +165,14 @@ class ControlSystem:
             for high_priority_bot_id in self.priority[self.priority.index(bot.id):]:
                 if high_priority_bot_id != bot.id:
                     if bot.check_collision(self.bots[high_priority_bot_id]):
-                        print(f"{bot.id} is colliding with {high_priority_bot_id} at " +
-                              f"{self.bots[high_priority_bot_id].coords}")
+                        # print(f"{bot.id} is colliding with {high_priority_bot_id} at " +
+                        #       f"{self.bots[high_priority_bot_id].coords}")
                         # print(self.bots[high_priority_bot_id].coords)
+                        
+                        # if bot.recalculate is None:
+                        #     bot.blocked = True
+                        #     bot.recalculate = time.time()
+
                         self.path_finder.set_block(self.bots[high_priority_bot_id].coords)
                         new_path, new_commands = self.path_finder.get_path(bot.target, bot.coords,
                                                                            bot.marker[0], bot.marker[3])
@@ -180,6 +189,14 @@ class ControlSystem:
                         if not is_equal(new_path, bot.path):
                             bot.step = 0
                             bot.path, bot.commands = new_path, new_commands
+
+
+            # if bot.recalculate is not None and time.time() - bot.recalculate > 0.5:
+                
+            #     bot.blocked = False
+            #     bot.recalculate = None
+                
+                
 
             if bot.blocked:
                 # bot.command_start = time.time()
@@ -234,7 +251,7 @@ class ControlSystem:
 
     def draw_packages(self, video_feed):
         for bot in self.bots:
-            if bot.id == 0 or bot.id == 1:
+            if bot.id == 0: # or bot.id == 1:
                 for i in range(len(bot.path) - 1):
                     cv2.line(video_feed, bot.path[i], bot.path[i + 1], bot.path_color[::-1], 4)
                 if any(bot.coords != np.zeros(2)):

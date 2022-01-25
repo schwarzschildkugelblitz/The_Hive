@@ -1,10 +1,14 @@
 jobs = [
-    ["FKMP0001", "1", "Ahmedabad"],
+
+["FKMP0001", "1", "Ahmedabad"],
+    ["FKMP0002", "1", "Pune"],  # Burner
+    
+    
+    
+    ["FKMP0002", "1", "Pune"],  # Burner
+    ["FKMP0002", "1", "Pune"],  # Burner
+
     ["FKMP0002", "1", "Pune"],
-
-    ["FKMP0002", "1", "Pune"],  # Burner
-    ["FKMP0002", "1", "Pune"],  # Burner
-
     ["FKMP0003", "2", "Ahmedabad"],
     ["FKMP0004", "2", "Bengaluru"],
     ["FKMP0005", "2", "Kolkata"],
