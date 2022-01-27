@@ -1,10 +1,9 @@
-""" this code was written by Harshit Batra and Rohan Deswal 
+""" this code was written by Rohan Deswal
 
 as part of hive round 2 """
 import numpy as np
 import pygame
 from math import atan2, degrees
-from astar import astar, Large_number_of_iterations
 from path_gen import gen_path
 
 locations = {
@@ -23,87 +22,17 @@ locations_coords = {
     '1': (4, 0),
     '2': (9, 0),
 
-    'Mumbai1': (1, 3),
-    'Mumbai2': (1, 4),
-    'Mumbai3': (2, 2),
-    'Mumbai4': (3, 2),
-    'Mumbai5': (4, 3),
-    'Mumbai6': (4, 4),
-    'Mumbai7': (2, 5),
-    'Mumbai8': (3, 5),
-
-    'Delhi1': (1, 7),
-    'Delhi2': (1, 8),
-    'Delhi3': (2, 9),
-    'Delhi4': (3, 9),
-    'Delhi5': (4, 8),
-    'Delhi6': (4, 7),
-    'Delhi7': (3, 6),
-    'Delhi8': (2, 6),
-
-    'Kolkata1': (1, 11),
-    'Kolkata2': (1, 12),
-    'Kolkata3': (2, 13),
-    'Kolkata4': (3, 13),
-    'Kolkata5': (4, 12),
-    'Kolkata6': (4, 11),
-    'Kolkata7': (3, 10),
-    'Kolkata8': (2, 10),
-
-    'Chennai1': (5, 3),
-    'Chennai2': (5, 4),
-    'Chennai3': (6, 5),
-    'Chennai4': (7, 5),
-    'Chennai5': (8, 4),
-    'Chennai6': (8, 3),
-    'Chennai7': (7, 2),
-    'Chennai8': (6, 2),
-
-    'Bengaluru1': (5, 7),
-    'Bengaluru2': (5, 8),
-    'Bengaluru3': (6, 9),
-    'Bengaluru4': (7, 9),
-    'Bengaluru5': (8, 8),
-    'Bengaluru6': (8, 7),
-    'Bengaluru7': (6, 6),
-    'Bengaluru8': (7, 6),
-
-    'Hyderabad1': (8, 12),
-    'Hyderabad2': (5, 11),
-    'Hyderabad3': (5, 12),
-    'Hyderabad4': (6, 13),
-    'Hyderabad5': (7, 13),
-    'Hyderabad6': (8, 11),
-    'Hyderabad7': (7, 10),
-    'Hyderabad8': (6, 10),
-
-    'Pune1': (9, 3),
-    'Pune2': (9, 4),
-    'Pune3': (10, 5),
-    'Pune4': (11, 5),
-    'Pune5': (12, 4),
-    'Pune6': (12, 3),
-    'Pune7': (11, 2),
-    'Pune8': (10, 2),
-
-    'Ahmedabad1': (9, 7),
-    'Ahmedabad2': (9, 8),
-    'Ahmedabad3': (10, 9),
-    'Ahmedabad4': (11, 9),
-    'Ahmedabad5': (12, 8),
-    'Ahmedabad6': (12, 7),
-    'Ahmedabad7': (11, 6),
-    'Ahmedabad8': (10, 6),
-
-    'Jaipur1': (9, 11),
-    'Jaipur2': (9, 12),
-    'Jaipur3': (10, 13),
-    'Jaipur4': (11, 13),
-    'Jaipur5': (12, 12),
-    'Jaipur6': (12, 11),
-    'Jaipur7': (11, 10),
-    'Jaipur8': (10, 10)
+    'Mumbai': (2, 3),
+    'Delhi': (2, 7),
+    'Kolkata': (2, 11),
+    'Chennai': (6, 3),
+    'Bengaluru': (6, 7),
+    'Hyderabad': (6, 11),
+    'Pune': (10, 3),
+    'Ahmedabad': (10, 7),
+    'Jaipur': (10, 11)
 }
+
 
 colors = {
     -3: (77, 53, 51), # Custom Blocks
@@ -136,6 +65,17 @@ arena = [[-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 
+def get_locations_coords(location_tag, suffix_val):
+    if location_tag == '1' or location_tag == '2':
+        return locations_coords[location_tag]
+
+    row, col = locations_coords[location_tag]
+    
+    offsets = [-1,-1,0,1,2,2,1,0]
+
+    return row + offsets[suffix_val-1], col + offsets[-suffix_val]
+
+
 def get_bot_angle(bot_top_left, bot_bottom_left):
     return atan2(bot_top_left[1] - bot_bottom_left[1], bot_top_left[0] - bot_bottom_left[0])
 
@@ -149,9 +89,6 @@ def get_align_command(bot_vector, path_vectors):
                   bot_vector[0] * direction[0] + bot_vector[1] * direction[1])
 
     angle = degrees(angle)
-    # print("Angle:",angle)
-    # print("Bot Vector:",bot_vector)
-    # print("Direction:",direction)
 
     if abs(angle - 90) < angle_threshold:
         return ['left']
@@ -234,11 +171,19 @@ class PathFinder:
         self.new_blocks = []
         self.line_path = []
 
+    def reset(self):
+        for point in self.points_to_visit:
+            arena[point[0]][point[1]] = 0
+        for point in self.new_blocks:
+            arena[point[0]][point[1]] = 0
+        self.__init__(self.width,self.height)
+
+
     def draw_path(self):
         pygame.init()
 
         game_display = pygame.display.set_mode((self.width, self.height + self.scale))
-        pygame.display.set_caption('A* Path Show')
+        pygame.display.set_caption('PathFinder Visualisation')
 
         clock = pygame.time.Clock()
         crashed = False
@@ -275,15 +220,7 @@ class PathFinder:
                             # print("Line Path:", self.line_path)
                         if self.reset_button_coord[0] <= x <= self.reset_button_coord[0] + self.scale and \
                                 self.reset_button_coord[1] <= y <= self.reset_button_coord[1] + self.scale:
-                            self.calculate_path = False
-                            for point in self.points_to_visit:
-                                arena[point[0]][point[1]] = 0
-                            for point in self.new_blocks:
-                                arena[point[0]][point[1]] = 0
-                            self.points_to_visit = []
-                            self.new_blocks = []
-                            self.path = []
-                            self.line_path = []
+                            self.reset()
 
                     if event.button == 2: #set Blocks:
                         self.set_block(pygame.mouse.get_pos())
@@ -321,15 +258,15 @@ class PathFinder:
             else:
                 color = (224, 189, 139)
 
-            textobj = set_text('O', self.calculate_button_coord[0] + self.scale // 2,
-                               self.calculate_button_coord[1] + self.scale // 2, 50)
+            text_obj = set_text('O', self.calculate_button_coord[0] + self.scale // 2,
+                                self.calculate_button_coord[1] + self.scale // 2, 50)
             pygame.draw.rect(game_display, color,
                              pygame.Rect(self.calculate_button_coord[0],
                                          self.calculate_button_coord[1], self.scale, self.scale))
             pygame.draw.rect(game_display, (0, 0, 0),
                              pygame.Rect(self.calculate_button_coord[0],
                                          self.calculate_button_coord[1], self.scale, self.scale), 2)
-            game_display.blit(textobj[0], textobj[1])
+            game_display.blit(text_obj[0], text_obj[1])
 
             # Reset Path Button
             x, y = pygame.mouse.get_pos()
@@ -348,15 +285,17 @@ class PathFinder:
                 y2,x2 = cell_2[0]*self.scale + self.scale//2, cell_2[1]*self.scale + self.scale//2
                 pygame.draw.line(game_display,(0,0,0),[x1,y1],[x2,y2],3)
 
-            textobj = set_text('X', self.reset_button_coord[0] + self.scale // 2,
-                               self.reset_button_coord[1] + self.scale // 2, 50)
+
+            text_obj = set_text('X', self.reset_button_coord[0] + self.scale // 2,
+                                self.reset_button_coord[1] + self.scale // 2, 50)
             pygame.draw.rect(game_display, color,
                              pygame.Rect(self.reset_button_coord[0], self.reset_button_coord[1],
                                          self.scale, self.scale))
             pygame.draw.rect(game_display, (0, 0, 0),
                              pygame.Rect(self.reset_button_coord[0], self.reset_button_coord[1],
                                          self.scale, self.scale), 2)
-            game_display.blit(textobj[0], textobj[1])
+
+            game_display.blit(text_obj[0], text_obj[1])
             pygame.display.update()
             clock.tick(60)
 
@@ -376,7 +315,7 @@ class PathFinder:
             paths = []
             path_found = False
             for i in range(1,9):
-                cur_path = gen_path(arena,start,locations_coords[target + str(i)],self.rows,self.cols)
+                cur_path = gen_path(arena,start,get_locations_coords(target,i),self.rows,self.cols)
                 if cur_path is None:
                     paths.append(None)
                     continue
@@ -413,9 +352,9 @@ class PathFinder:
             align_command = get_align_command(bot_vector, path[:2])
             drop_command = get_drop_align(path[-2:],path_vectors)
 
-            outurns = align_command + turns + drop_command
+            ou_turns = align_command + turns + drop_command
 
-            return self.convert_to_space(path,False,None),outurns
+            return self.convert_to_space(path,False,None),ou_turns
 
         path = gen_path(arena,start,end,self.rows,self.cols)
         if path is None:
@@ -424,13 +363,13 @@ class PathFinder:
         turns = get_turns(path)
         align_command = get_align_command(bot_vector, path[:2])
 
-        outurns = align_command + turns
+        ou_turns = align_command + turns
 
-        if outurns[0] == '180' and outurns[1] == 'right':
-            outurns = ['left']
+        if ou_turns[0] == '180' and ou_turns[1] == 'right':
+            ou_turns = ['left']
             path = [path[0]] + [path[-1]]
 
-        return self.convert_to_space(path,True,target),outurns + ['stop']
+        return self.convert_to_space(path,True,target),ou_turns + ['stop']
 
         # return self.convert_to_space(path,True,target), align_command + turns + ['stop']
 
@@ -470,41 +409,40 @@ class PathFinder:
         for point in points:
             x = point[1]
             y = point[0]
-            xoff, yoff = 0, 0
+            x_off, y_off = 0, 0
             if x == 0 and y == 4:
-                xoff = -off
-                # yoff = -off
+                x_off = -off
+                # y_off = -off
             else:    
                 if x % 2 == 0:
-                    xoff = - off
+                    x_off = - off
                 else:
-                    xoff = + off
+                    x_off = + off
 
                 if x > 1:
                     if y % 2 == 0:
-                        yoff = + off
+                        y_off = + off
                     else:
-                        yoff = - off
+                        y_off = - off
                 if x == 1:
                     if y == 12:
-                        yoff = + off
+                        y_off = + off
                     if y == 1:
-                        yoff = - off
-                    # if y == 4:
-                    #     yoff = - off
-            x = point[1] * self.scale + self.scale // 2 + xoff
-            y = point[0] * self.scale + self.scale // 2 + yoff
+                        y_off = - off
+
+            x = point[1] * self.scale + self.scale // 2 + x_off
+            y = point[0] * self.scale + self.scale // 2 + y_off
             space_points.append([x, y])
 
         return np.array(space_points, dtype=np.int32)
 
 
-def set_text(string, coordx, coordy, font_size):  # Function to set text
+def set_text(string, coord_x, coord_y, font_size):  # Function to set text
 
     font = pygame.font.Font('freesansbold.ttf', font_size)
     text = font.render(string, True, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = (coordx, coordy)
+    text_rect.center = (coord_x, coord_y)
     return text, text_rect
 
 
