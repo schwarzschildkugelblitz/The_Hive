@@ -1,42 +1,58 @@
-// TX <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-// flow : s1 -> recv -> parsedData -> address , angle + sign , distance + sign -> PID -> V 
-//-> signed speed -> unsigned speed + sign bit - > TX
+/*
+Transmission.ino handles the tarnsmission of commands issued by Central Tracking System 
 
+transmitts 1 byte data at a time 
+--> 1st 8 bit number => 2 bit for address + 6 bit for modes
+
+flow : s1 -> recv -> parsedData -> transmision 
++ kill switch interrupt 
+
+written by Tanmay Vadhera
+and minor fixes by Harshit Batra 
+
+
+dependies  
+    - ServoTimer2.h
+    - SPI.h
+*/
 #include <SPI.h>
 #include <RH_NRF24.h>
 
 #define stopButton  2
 
-// 1st 8 bit number -> 2 bit address + 6 bit modes
-// 2nd 8 bit number => 1 sign bit , 4 bit base speed , 3 empty bits
 RH_NRF24 nrf24(9, 10);
 uint8_t data[2];
-int x =0;
+int x =0,y=0;
 uint8_t parsedData[2];
-void stopAll() // modify the data to be sent
-{
 
-while (digitalRead(2)==HIGH)
-{
-  for(x = 0; x < 4;x++)
-  {
- 
-  parsedData[0] = x+4*58; // XXXX(A1)(A0) & 000011 + 1110 1000 = 1110 10(A1)(A0) : 58 is the stop code
-  nrf24.send(parsedData, sizeof(parsedData)); // send data
-  nrf24.waitPacketSent();
-   parsedData[0] = x+4*58; // XXXX(A1)(A0) & 000011 + 1110 1000 = 1110 10(A1)(A0) : 58 is the stop code
-  nrf24.send(parsedData, sizeof(parsedData)); // send data
-  nrf24.waitPacketSent();
+void KILLAll() {
+  /* function to stop all bot motion
+  issues 2 stop command for each bot   
+  */
+  while (digitalRead(2)==HIGH){
+    // Iterating for all Bots 
+    for(x = 0; x < 4;x++){
+      // 2 stop command for each bot 
+      for(y = 0; Y < 2 ;y++){
+      // XXXX(A1)(A0) & 000011 + 1110 1000 = 1110 10(A1)(A0) : 58 is the stop code
+      parsedData[0] = x+4*58; 
+      // send data
+      nrf24.send(parsedData, sizeof(parsedData)); // send data
+      nrf24.waitPacketSent();
+      }
+    }
   }
 }
-}
 
 
-void setup()
-{
+void setup(){
   Serial.begin(115200);
+
+  // interrupt to kill all transmission 
   pinMode(stopButton, INPUT_PULLUP); // already refrenced to +5v / HIGH via pullup
-  attachInterrupt(digitalPinToInterrupt(stopButton), stopAll, RISING);
+  attachInterrupt(digitalPinToInterrupt(stopButton), KILLAll(), RISING);
+
+  // verifying configuration 
   if (!nrf24.init());
 //    Serial.println("init failed");
   if (!nrf24.setChannel(1));
@@ -45,42 +61,35 @@ void setup()
 //    Serial.println("setRF failed");    
 
 }
+int i,k; // index vars
 
-// float timi=millis(),timf,D,x,V=0,filter_state=0,integrator_state=0; // implemented in py
-// float Kp=0.00025,Kd=0.0155,Ki=0.000085,N=34;// tuned values
-// int add,speed,sign,speed2=0,misc=0;
- int theta,dist,i,k; // index vars
-
-
-void loop()
-{
-  // 0 1 2 3 -> angle +ve , distance +ve , 4 5  
-  parsedData[0] =0;// do not change default state 
+void loop(){
+  // default state 
+  parsedData[0] =0;
   parsedData[1] =0;
   String s1;
   char recv[10];//max
   
-  while (!Serial.available());  // w8 until serial monitor sends out a response
+  // Waiting for response from central tracking system 
+  while (!Serial.available());  
   
-  s1 = Serial.readStringUntil('\n');
+  // Reading Data from command system 
+  s1 = Serial.readStringUntil('\n');  
   s1.toCharArray(recv,sizeof(recv)); 
   
-  // process the char array
-  i=0;
-  k=0; // index vars
-  // 1 2 3 
+  // index vars 
+  i=0,k=0; 
   
+  // Parsing Data
   while(recv[i]!='\0')
   {
     if(recv[i] == ' ')
       k++; // skip to next pack
     else
       parsedData[k]=parsedData[k]*10+recv[i]-48; // add the new digit
-   
     i++;
   }
-   
-  nrf24.send(parsedData, sizeof(parsedData)); // send data
+  // Transmitting Data
+  nrf24.send(parsedData, sizeof(parsedData)); 
   nrf24.waitPacketSent();
-  //delay(22); // maintain sync
 }
