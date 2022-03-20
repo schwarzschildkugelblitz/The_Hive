@@ -23,10 +23,11 @@ Designed By Team Placeholders and Manufactured By PCB Powers
 ![151336828-df838c24-ffac-4909-9ef3-fa408727c776](https://user-images.githubusercontent.com/71646613/159185788-fbd925c6-23fa-4853-8a2e-04355c4c729b.jpg)
 
 ### 3D view 
+![pcb_flip](https://user-images.githubusercontent.com/71646613/159188544-45afeccb-a9c6-4356-9fa3-2df06aadeb85.png)
 
 ## Iteration 2
 
-Designed By Team placeholders and Manufactured at CEDT lab,NSUT
+Designed By Team Placeholders and Manufactured at CEDT lab,NSUT
 
 ### What's new 
 
