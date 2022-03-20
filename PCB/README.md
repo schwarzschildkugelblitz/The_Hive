@@ -20,6 +20,7 @@ Designed By Team placeholders and Manufactured By PCB Powers
 3. Receiving Data from Central Tracking system 
 
 ### Schmatic Diagram 
+![151336828-df838c24-ffac-4909-9ef3-fa408727c776](https://user-images.githubusercontent.com/71646613/159185788-fbd925c6-23fa-4853-8a2e-04355c4c729b.jpg)
 
 ### 3D view 
 
