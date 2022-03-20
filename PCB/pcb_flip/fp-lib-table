@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name pcb_flip)(type KiCad)(uri ${KIPRJMOD}/pcb_flip.pretty)(options "")(descr ""))
-)
