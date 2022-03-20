@@ -1,4 +1,13 @@
+"""
+By Harshit Batra
+Path Generation program, 
+This program Generates Path for the Bot using A star algorithm 
+Ref -
+    https://en.wikipedia.org/wiki/A*_search_algorithm
+    
+"""
 class Large_number_of_iterations(Exception):
+    """ Expection class for large time consuming paths """
     def __init__(self, count, error_message="too time consuming case"):
         self.count = count
         self.error_message = error_message
