@@ -2,7 +2,7 @@
 
 ## Iteration 1 
 
-Designed By Team placeholders and Manufactured By PCB Powers 
+Designed By Team Placeholders and Manufactured By PCB Powers 
 
 ### Dimensions
 
@@ -49,3 +49,5 @@ Designed By Team placeholders and Manufactured at CEDT lab,NSUT
 ![pcb_flip (1)](https://user-images.githubusercontent.com/71646613/159188008-363cf2f7-0ebf-4ccd-a616-3fb204d00a17.jpg)
 
 ### 3D view 
+![pcb_flip](https://user-images.githubusercontent.com/71646613/159188096-0a0151e2-b135-4965-b236-c5b65ab0b455.png)
+
