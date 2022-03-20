@@ -46,5 +46,6 @@ Designed By Team placeholders and Manufactured at CEDT lab,NSUT
 3. Receiving Data from Central Tracking system 
 
 ### Schmatic Diagram 
+![pcb_flip (1)](https://user-images.githubusercontent.com/71646613/159188008-363cf2f7-0ebf-4ccd-a616-3fb204d00a17.jpg)
 
 ### 3D view 
