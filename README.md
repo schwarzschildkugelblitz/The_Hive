@@ -42,13 +42,14 @@ tracked in real-time
 ## About The Team 
 ![Untitled design](https://user-images.githubusercontent.com/71646613/132249350-38f5f4f0-2d01-4246-bfad-973f2d42afb8.png)
 
+The Team consisted of the following members 
 1. Harshit Batra 
 2. Tanmay Vadhera
 3. Mudit Aggarwal
-4. Harshit Kapoor 
+4. Rohan Deswal
 5. Drishti Adlakha 
 6. Arjun Narula 
-7. Rohan Deswal 
+7. Harshit Kapoor
 8. Mukul Gupta 
 9. Vikas Poddar 
 10. Soham
