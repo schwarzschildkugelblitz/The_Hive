@@ -1,11 +1,11 @@
 /* RECEPTION CODE handles reception , decoding and execution of various commands
-given by central tracking system 
-
-written by Tanmay Vadhera
-and minor changes made by Mudit Aggarwal, Rohan Deswal and Harshit Batra 
+given issued by central tracking system 
 
 
-dependies  
+written by Tanmay Vadhera , Harshit Batra ,Mudit Aggarwal and Rohan Deswal 
+
+
+Dependencies :  
     - ServoTimer2.h
     - SPI.h
     - RH_NRF24.h 
@@ -13,334 +13,395 @@ dependies
 
 #include <ServoTimer2.h>  // the servo library
 #include <SPI.h>  // SPI library 
-#include <RH_NRF24.h> //NRF library 
+#include <RH_NRF24.h> //Radio Head library 
 
-#define Worker_bee_Address 1
+#define Worker_bee_Address 1 // bot address 
 #define LEFT 95 // speed of left motor
 #define RIGHT 106 // speed of right motor
-#define tau 0.00016
-#define a 0.0017
-#define b 0.00000288
-#define h 0.00102
-#define l 0.00204
+
+#define RED_LED A0 
+#define GREEN_LED A1
+#define BLUE_LED A2
+
+//intializing NRf and Servo 
+
 RH_NRF24 nrf24 (A4,A3);
 ServoTimer2 flipper_servo; 
 
-
 class motor 
 {
+
   public:
-  int pin1,pin2,En;
+  int pin1 , pin2 , En
   motor(int pinA,int pinB,int en=4)
   {
-    pin1=pinA;
-    pin2=pinB;
-    En = en;
+    pin1 = pinA ;
+    pin2 = pinB ;
+    En = en ;
     pinMode(pin1,OUTPUT);
     pinMode(pin2,OUTPUT);
-    pinMode(en,OUTPUT);
+    pinMode(En,OUTPUT);
     digitalWrite(En,1);
   }
-  void move(int val1,int val2)
+  void move_command(int val1,int val2)
   {
     analogWrite(pin1,val1);
     analogWrite(pin2,val2);
   }
 
-  void fd()
+  void forward_command()
   {
-//    digitalWrite(pin1,1);
-//    digitalWrite(pin2,0);
-
-    analogWrite(pin1,100);
+    // moves motor forward
+    analogWrite(pin1,200);
     analogWrite(pin2,0);
   }
   
-  void bk()
+  void backward_command()
   {
-//    digitalWrite(pin1,0);
-//    digitalWrite(pin2,1);
-
+    // moves motor backwards
     analogWrite(pin1,0);
-    analogWrite(pin2,100);
+    analogWrite(pin2,200);
   }
   
-  void stp()
+  void stop_command()
   {
+    // stops the motor 
     digitalWrite(pin1,0);
     digitalWrite(pin2,0);
   }
 
-}L(10, 9),R(6,5); // instances
+}Left_motor(10, 9),Right_motor(6,5); // instances
 
 
-uint8_t add,sign,spd2,misc;
-int8_t spd1;
+uint8_t address,sign;
+int8_t offset_speed;
 
 void unpack (uint8_t pack[])
 {
-  add=0;
-  spd2=0;
-  misc=0;
-  spd1=0;
-  uint8_t cnt=0;  
+  /* 
+    Reading received Data
+  */  
+  address=0;
+  offset_speed=0; 
 
   sign = pack[1];
   
   if (pack[0] !=0){
-    spd1 = pack[0]>>2;       
-    add = pack[0]&3;
+    offset_speed = pack[0]>>2;       
+    address = pack[0]&3;
   }
 }
 
 void setup() 
 {
-  pinMode(A0,OUTPUT);
-  pinMode(A2,OUTPUT);
+  pinMode(RED_LED,OUTPUT);
+  pinMode(GREEN_LED,OUTPUT);
+  pinMode(BLUE_LED,OUTPUT);
   flipper_servo.attach(3);
   flipper_servo.write(1120);
   delay(1000);
   pinMode (10,OUTPUT);
   digitalWrite(10,0);
   Serial.begin(9600);
-  
-  if (!nrf24.init())
-    Serial.println("init failed");
-    
-  // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-  if (!nrf24.setChannel(2))
-    Serial.println("setChannel failed");
-    
-  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-    Serial.println("setRF failed");    
-  
-  flipper_servo.write(-130);
-  delay(1000);  
-  flipper_servo.write(1120);
 
-//  R.move(RIGHT+(int)spd1,0);
-//  L.move(LEFT-(int)spd1,0);
-//  delay(1000);
+  // Verifying Configration 
+  if (!nrf24.init()){
+    // verifying nrf initialization
+    Serial.println("init failed"); 
+    // if init fails blink green led 10 times
+    for(int i = 0 ; i <10 ; i ++){
+      digitalWrite(GREEN_LED,0);
+      delay(100);
+      digitalWrite(GREEN_LED,1);
+      delay(100);
+    }
+    digitalWrite(A1,0);
+  }
+  if (!nrf24.setChannel(1)){
+    // verifying nrf set channel 
+    // Channel frequency used is (2400 + channel) MHz  
+    Serial.println("setChannel failed"); 
+    // if setChannel fails turn on green led 
+    for(int i = 0 ; i <20 ; i ++){
+      digitalWrite(GREEN_LED,1);
+      delay(100);
+    } 
+    digitalWrite(A1,0);
+  } 
+  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm)){
+    Serial.println("setRF failed");
+    // if setRF fails blink green and red led alternatively 5 times 
+    for(int i = 0 ; i <5 ; i ++){
+      digitalWrite(GREEN_LED,0);
+      delay(100);
+      digitalWrite(GREEN_LED,1);
+      delay(100);
+      digitalWrite(RED_LED,0);
+      delay(100);
+      digitalWrite(RED_LED,1);
+      delay(100);
+    }
+    digitalWrite(A1,0);
+    digitalWrite(A0,0);
+  }   
 }
 
 uint8_t len;
-unsigned int num_trans = 0;
+unsigned int number_of_transmission = 0;
 void loop()
 {
-//  myservo.write(1130);
   if (nrf24.available())
   {
-    //Serial.println("Rohan");
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     len = sizeof(buf);
-  
+
+    // decoding received signal 
     if (nrf24.recv(buf, &len))
     {
-        num_trans+=1;
-        
-//      Serial.print(buf[0]);
-//      Serial.print(" ");
-//      Serial.print(buf[1]);
-        
-      unpack(buf);
-//
-      Serial.print(" -> ");
-      Serial.print(add);
-      Serial.print(" ");
-      Serial.println(spd1);
-                 
-      if(add == Worker_bee_Address) // do anything only if the address matches
-      {
-        
-        if (num_trans++ >= 5 && num_trans < 10) // blinky blinky
-          digitalWrite(A2,1);
-         else if (num_trans >= 10) 
-          {
-            num_trans = 0;
-            digitalWrite(A2,0);
-          }
-          
-        if (spd1>=0 && spd1 <= 55)
-        {
-          spd1 = sign == 1 ? -spd1 : spd1; // sign = 1 indicates that spd1 is negative
 
-//          digitalWrite(A0,HIGH);
-//          delay(500);
-//          digitalWrite(A0,LOW);
-//          delay(500);
+      number_of_transmission +=1;     
+      unpack(buf);       
+      if(address == Worker_bee_Address) // do anything only if the address matches - thats what she said ;)
+      {
+        // blinking blue led for every 10 Transmission
+        if (number_of_transmission % 10 > 3 && number_of_transmission < 9) // blinky blinky - Tanmay 2021 ;)
+          digitalWrite(BLUE_LED,1);
+        else if (number_of_transmission % 10 == 0)
+        {
+          digitalWrite(BLUE_LED, 0);
+        }
+        // PID commands 
+        if (offset_speed >=0 && offset_speed <= 55)
+        {
+          offset_speed = sign == 1 ? -offset_speed : offset_speed; // sign = 1 indicates that offset_speed is negative
+
+          Right_motor.move_command(RIGHT + offset_speed,0);
+          Left_motor.move_command(LEFT  - offset_speed,0);
           
-          R.move(RIGHT + spd1,0);
-          L.move(LEFT  - spd1,0);
-//          changes made 
-//          delay(5); 
-//          R.move(RIGHT,0);
-//          L.move(LEFT,0);
-          
         }
-        // mode instances          
-        else if(spd1 == 56)  
-        {   // left
-            L.move(0,200);
-            R.move(0,200);
-            delay(30);
-            L.stp();
-            R.stp();
-            delay(100);
-            L.move(0,150);
-            R.move(150,0);
-            delay(330);
-            L.move(150,0);
-            R.move(0,150);
-            delay(20);
-            L.stp();
-            R.stp();
-            delay(50);
-        }
-        else if (spd1 == 57)
-        {   // right
-            L.move(0,200);
-            R.move(0,200);
-            delay(30);
-            L.stp();
-            R.stp();
-            delay(100);
-            L.move(150,0);
-            R.move(0,150);
-            delay(370);
-            L.move(0,150);
-            R.move(150,0);
-            delay(20);
-            L.stp();
-            R.stp();
-            delay(50);
-        }
-        else if (spd1 == 58)
-        {   // stop
-          L.stp();
-          R.stp();
-        }
-        else if(spd1 == 59){ 
-          // right_drop
-          L.move(0,200);
-          R.move(0,200);
+        // 56-63 special commands           
+        else if(offset_speed == 56)  
+        {
+          // Special command => left Trun 
+
+          // retardation by inverting speed 
+          Left_motor.backward__command();
+          Right_motor.backward_command();
+
           delay(30);
-          L.stp();
-          R.stp();
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+
           delay(100);
-          L.move(150,0);
-          R.move(0,150);
+
+          // 90 deg counter clock wise rotation
+          Left_motor.move_command(0, 150);
+          Right_motor.move_command(150, 0);
+          delay(330);
+
+          // retardation by inverting speed 
+          Left_motor.move_command(150, 0);
+          Right_motor.move_command(0, 150);
+          delay(20);
+
+          //stopping bot to remove any prexisting motion 
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+          delay(50);
+        }
+        else if (offset_speed == 57)
+        {  
+          // Special command => Right Trun
+
+          // retardation by inverting speed 
+          Left_motor.backward_command();
+          Right_motor.backward_command();
+          delay(30);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+          delay(100);
+
+          // 90 deg clock wise rotation 
+          Left_motor.move_command(150, 0);
+          Right_motor.move_command(0, 150);
           delay(370);
-          L.move(0,150);
-          R.move(150,0);
+
+          // retardation by inverting speed 
+          Left_motor.move_command(0, 150);
+          Right_motor.move_command(150, 0);
           delay(20);
-          L.stp();
-          R.stp();
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
           delay(50);
-          
-          
-          L.move(150,0);
-          R.move(150,0);
-          delay(300);
-          L.stp();
-          R.stp();
-          delay(100);
-          
-          flipper_servo.write(-130);
-          delay(500);  
-          flipper_servo.write(1120);
-          delay(100);
-      
-          L.move(0,150);
-          R.move(0,150);
-          delay(250);
-          L.stp();
-          R.stp();
+
         }
-        else if(spd1 == 60)
-        // left_drop
+        else if (offspeed == 58)
         {
-          L.move(0,200);
-          R.move(0,200);
+          // Special command => Stop 
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+        }
+        else if(offspeed == 59){ 
+          // Special command => right drop
+
+          // retardation by inverting speed 
+          Left_motor.backward_command();
+          Right_motor.backward_command();
           delay(30);
-          L.stp();
-          R.stp();
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
           delay(100);
-          L.move(0,150);
-          R.move(150,0);
-          delay(300);
-          L.move(150,0);
-          R.move(0,150);
+
+          // 90 deg clock wise rotation 
+          Left_motor.move_command(150, 0);
+          Right_motor.move_command(0, 150);
+          delay(370);
+
+          // retardation by inverting speed 
+          Left_motor.move_command(0, 150);
+          Right_motor.move_command(150, 0);
           delay(20);
-          L.stp();
-          R.stp();
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
           delay(50);
-          
-          
-          L.move(150,0);
-          R.move(150,0);
+
+          //Moving bot towards dropchute
+          Left_motor.forward_command(150,0);
+          Right_motor.forward_command(150,0);
           delay(300);
-          L.stp();
-          R.stp();
+
+          //stopping bot 
+          Left_motor.stop_command();
+          Right_motor.stop_command();
           delay(100);
           
+          //flipping the flipper 
           flipper_servo.write(-130);
           delay(500);  
           flipper_servo.write(1120);
           delay(100);
-      
-          L.move(0,150);
-          R.move(0,150);
-          delay(250);
-          L.stp();
-          R.stp();
+
+          //Moving bot away from dropchute
+          Left_motor.backward_command();
+          Right_motor.backward_command();
+          delay(200);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
         }
-        else if (spd1 == 61)
-        // drop
+        else if(offspeed == 60)
         {
-          L.move(150,0);
-          R.move(150,0);
+          // Special command => left drop
+
+          // retardation by inverting speed 
+          Left_motor.backward_command();
+          Right_motor.backward_command();
+          delay(30);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+          delay(100);
+
+          // 90 deg counter clock wise rotation
+          Left_motor.move_command(0, 150);
+          Right_motor.move_command(150, 0);
+          delay(330);
+
+          // retardation by inverting speed 
+          Left_motor.move_command(0, 150);
+          Right_motor.move_command(150, 0);
+          delay(20);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+          delay(50);
+
+          //Moving bot towards dropchute
+          Left_motor.forward_command(150,0);
+          Right_motor.forward_command(150,0);
           delay(300);
-          L.stp();
-          R.stp();
+
+          //stopping bot 
+          Left_motor.stop_command();
+          Right_motor.stop_command();
           delay(100);
           
+          //flipping the flipper 
           flipper_servo.write(-130);
           delay(500);  
           flipper_servo.write(1120);
           delay(100);
-      
-          L.move(0,150);
-          R.move(0,150);
-          delay(250);
-          L.stp();
-          R.stp();
+
+          //Moving bot away from dropchute
+          Left_motor.backward_command();
+          Right_motor.backward_command();
+          delay(200);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
         }
-        else if (spd1 == 62)
-        //180
+        else if (offspeed == 61)
         {
-          //  delay(100);
-          //  L.move(0,150);
-          //  R.move(0,150);
-          //  
-          //  delay(600);
-            L.move(150,0);
-            R.move(0,160);
-            delay(640);
-            L.move(0,200);
-            R.move(200,0);
-            delay(30);
-            L.stp();
-            R.stp();
+          // Special command => drop
+
+          //Moving bot towards dropchute
+          Left_motor.forward_command(150,0);
+          Right_motor.forward_command(150,0);
+          delay(300);
+
+          //stopping bot 
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+          delay(100);
           
-          //  delay(20);
-          //  L.move(0,150);
-          //  R.move(0,150);
-          //  delay(550);
-          //  L.stp();
-          //  R.stp();
+          //flipping the flipper 
+          flipper_servo.write(-130);
+          delay(500);  
+          flipper_servo.write(1120);
+          delay(100);
+
+          //Moving bot away from dropchute
+          Left_motor.backward_command();
+          Right_motor.backward_command();
+          delay(200);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
         }
-        else if (spd1 == 63);
-        //null  
+        else if (offspeed == 62)
+        {
+          // Special command => 180 turn
+
+          // 180 deg clock wise rotation
+          Left_motor.move_command(150, 0);
+          Right_motor.move_command(0, 160);
+          delay(640);
+
+          // retardation by inverting speed 
+          L.move(0, 200);
+          R.move(200, 0);
+          delay(30);
+
+          //stopping bot to remove any prexisting motion
+          Left_motor.stop_command();
+          Right_motor.stop_command();
+        }
+        else if (offspeed == 62); 
       }
     }
   }
