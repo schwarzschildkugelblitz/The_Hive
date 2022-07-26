@@ -1,5 +1,5 @@
 """
-By Harshit Batra
+By Harshit Batra and Mukul Gupta
 Path Generation program, 
 This program Generates Path for the Bot using A star algorithm 
 Ref -
